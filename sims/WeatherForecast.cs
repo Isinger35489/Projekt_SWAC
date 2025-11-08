@@ -1,4 +1,4 @@
-namespace sims;
+namespace SIMS.Core;
 
 public class WeatherForecast
 {

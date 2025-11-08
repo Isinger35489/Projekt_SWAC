@@ -1,0 +1,80 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+enum RoleType {
+  Admin
+  User
+}
+
+class User {
+  Id: int
+  Username: string
+  PasswordHash: string
+  Email: string
+  Role: RoleType
+  Enabled: bool
+  CreatedAt: DateTime
+  Validate(): void
+  Disable(): void
+  Enable(): void
+}
+
+class Incident {
+  Id: int
+  ReporterId: int
+  HandlerId: int
+  Description: string
+  Severity: string
+  Status: string
+  CVE: string
+  EscalationLevel: int
+  System: string
+  CreatedAt: DateTime
+  ClosedAt: DateTime
+  Close(): void
+  Edit(): void
+  Escalate(toUserId: int): void
+  Validate(): void
+}
+
+class Log {
+  Id: int
+  Timestamp: DateTime
+  Loglevel: string
+  Message: string
+  UserId: int
+  Create(level: string, message: string, userId: int): Log
+}
+
+interface IRepository {
+  GetById(id: int): object
+  GetAll(): List
+  Add(entity: object): void
+  Update(entity: object): void
+  Delete(id: int): void
+}
+
+class UserRepository
+class IncidentRepository
+class LogRepository
+
+IRepository <|-- UserRepository
+IRepository <|-- IncidentRepository
+IRepository <|-- LogRepository
+
+interface INotificationService {
+  Notify(userId: int, message: string): void
+}
+
+class NotificationService
+INotificationService <|-- NotificationService
+
+class AuthService
+class RedisSessionService
+
+' Beziehungen
+User "1" -- "0..*" Incident : meldet >
+Incident "1" -- "0..*" Log : protokolliert >
+User "1" -- "0..*" Log : hatLog >
+
+@enduml

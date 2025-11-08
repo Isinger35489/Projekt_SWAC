@@ -1,0 +1,50 @@
++----------------------------------------------------------+
+|                      RoleType (enum)                     |
+|----------------------------------------------------------|
+| Admin, User                                              |
++----------------------------------------------------------+
+
++------------------+      +---------------+            +-----------+
+|      User        |<>----|   Incident    |<>----------|   Log     |
++------------------+      +---------------+            +-----------+
+| Id               |      | Id            |            | Id        |
+| Username         |      | ReporterId    |            | Timestamp |
+| PasswordHash     |      | HandlerId     |            | Loglevel  |
+| Email            |      | Description   |            | Message   |
+| Role: RoleType   |      | Severity      |            | UserId    |
+| Enabled          |      | Status        |            +-----------+
+| CreatedAt        |      | CVE           |     
++------------------+      | EscalationLvl |     (User meldet Incident)
+| +Validate()      |      | System        |     (Incident erzeugt Log)
+| +Disable()       |      | CreatedAt     |
+| +Enable()        |      | ClosedAt      |
++------------------+      +---------------+
+                                      
+           +------------------------------+
+           |      IRepository (Interface) |
+           |------------------------------|
+           | +GetById(id)                 |
+           | +GetAll()                    |
+           | +Add(entity)                 |
+           | +Update(entity)              |
+           | +Delete(id)                  |
+           +--------------+---------------+
+                          ^
+           +--------------|---------------+
+           |              |               |
+    +----------------+ +----------------+ +--------------+
+    | UserRepository | |IncidentRepository| |LogRepository|
+    +----------------+ +----------------+ +--------------+
+
++-------------------------+      +------------------------+
+| INotificationService    |      |   NotificationService  |
+|-------------------------|      +------------------------+
+| +Notify(userId, msg)    |<-----| implements             |
++-------------------------+      +------------------------+
+
++------------------+
+|  AuthService     |
++------------------+
++----------------------+
+| RedisSessionService  |
++----------------------+
