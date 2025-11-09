@@ -1,4 +1,5 @@
-
+using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 namespace SIMS.API
 {
     public class Program
@@ -8,12 +9,31 @@ namespace SIMS.API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+                        builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            //Datenbank service hinzufügen
+            builder.Services.AddDbContext<SimsDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            //Lösung für Regis Problem local wird localhost verwendet, für redis wird port 6379 verwendet
+            var redisHost = Environment.GetEnvironmentVariable("REDIS_HOST") ?? "localhost";
+            var redisPort = Environment.GetEnvironmentVariable("REDIS_PORT") ?? "6379";
+
+            //regis integrieren auf fixen port
+            // builder.Services.AddSingleton<IConnectionMultiplexer>
+            //   (                  ConnectionMultiplexer.Connect("redis:6379"));
+
+            //variabler port für redis statt fixer port
+            builder.Services.AddSingleton<IConnectionMultiplexer>(
+                ConnectionMultiplexer.Connect($"{redisHost}:{redisPort}")
+            );
+
+            //RegisSessionService einbinden
+            builder.Services.AddSingleton<RedisSessionService>();
+
+            //nach hier dürfen keine Builds mehr vorkommen
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

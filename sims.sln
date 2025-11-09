@@ -3,14 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIMS.Core", "sims\SIMS.Core.csproj", "{A1083600-11D0-4953-9CE7-327E59F32F75}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIMS.Core", "SIMS.Core\SIMS.Core.csproj", "{A1083600-11D0-4953-9CE7-327E59F32F75}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Projektmappenelemente", "Projektmappenelemente", "{84D27F74-D2BA-6C25-2661-968F101900D9}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIMS.Web", "SIMS.Web1\SIMS.Web.csproj", "{282C3827-E7F5-4430-9F53-E5AB5F7E8081}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIMS.Web", "SIMS.Web\SIMS.Web.csproj", "{282C3827-E7F5-4430-9F53-E5AB5F7E8081}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIMS.API", "SIMS.API\SIMS.API.csproj", "{9C750BEB-E482-4345-AB73-12070B9589DB}"
 EndProject
