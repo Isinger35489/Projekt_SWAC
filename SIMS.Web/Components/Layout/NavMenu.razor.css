@@ -71,6 +71,36 @@
         width: 100%;
     }
 
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 100%;
+    background: linear-gradient(to bottom, #222863, #560050); /* Dein FH-Design */
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    font-size: 1.4em;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.nav-link {
+    margin: 10px 0;
+    font-size: 1.1em;
+    transition: background 0.2s;
+}
+
+    .nav-link.active, .nav-link:hover {
+        background: rgba(255,255,255,0.1);
+        border-radius: 7px;
+    }
+
+
 .nav-item ::deep a.active {
     background-color: rgba(255,255,255,0.37);
     color: white;

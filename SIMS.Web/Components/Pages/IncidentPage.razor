@@ -1,0 +1,184 @@
+﻿@using SIMS.Core;
+@page "/incidents"
+@inject HttpClient Http
+
+<h3>Incidents</h3>
+
+<button @onclick="LoadMockData">Nur Frontend testen (Dummy-Daten laden)</button>
+<button @onclick="LoadIncidents">Backend/Live-Daten laden</button>
+
+@if (incidents == null)
+{
+    <p>Lade Daten...</p>
+}
+else
+{
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Status</th>
+            <th>Beschreibung</th>
+            <th>Alert-Level</th>
+            <th>Aktionen</th>
+        </tr>
+        @foreach (var inc in incidents)
+        {
+            <tr>
+                <td>@inc.Id</td>
+                <td>@inc.Status</td>
+                <td>@inc.Description</td>
+              <td>@inc.EscalationLevel</td>
+        <td>
+            <button @onclick="() => Edit(inc)">Bearbeiten</button>
+            <button @onclick="() => Delete(inc.Id)">Löschen</button>
+            @if (inc.EscalationLevel >= 3)  //3 ist AlertLevel
+            {
+                <button @onclick="() => ForwardIncident(inc)">Weiterleiten</button>
+            }
+        </td>
+    </tr>
+          
+        }
+    </table>
+
+    <h4>Neues Incident anlegen:</h4>
+    <input @bind="newIncident.Status" placeholder="Status" />
+    <input @bind="newIncident.Description" placeholder="Beschreibung" />
+    <input type="number" @bind="newIncident.EscalationLevel" placeholder="Escalation Level" />
+    <button @onclick="Add">Anlegen</button>
+}
+
+@code {
+    private List<Incident> incidents;
+    private Incident newIncident = new Incident();
+    private Incident editIncident;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await LoadIncidents(); 
+        }
+        catch
+        {
+            await LoadMockData(); 
+        }
+    }
+
+    private async Task LoadIncidents()
+    {
+        incidents = await Http.GetFromJsonAsync<List<Incident>>("/api/incidents");
+        StateHasChanged();
+    }
+
+ private Task LoadMockData()
+{
+    incidents = new List<Incident>
+    {
+        new Incident { Id = 1, Status = "Offen", Description = "Dummy-Incident 1", EscalationLevel = 2 },
+        new Incident { Id = 2, Status = "In Bearbeitung", Description = "Dummy-Incident 2", EscalationLevel = 4 } 
+    };
+    StateHasChanged();
+    return Task.CompletedTask;
+}
+
+
+    private async Task Add()
+    {
+        if (incidents.Any(i => i.Id == newIncident.Id))
+            return; 
+
+        if (IsUsingDummyData())
+        {
+            var nextId = incidents.Any() ? incidents.Max(i => i.Id) + 1 : 1;
+            var localCopy = new Incident 
+            { Id = nextId, 
+              Status = newIncident.Status,
+              Description = newIncident.Description, 
+              EscalationLevel = newIncident.EscalationLevel
+            };
+            incidents.Add(localCopy);
+            newIncident = new Incident();
+            StateHasChanged();
+            return;
+        }
+
+     
+        var res = await Http.PostAsJsonAsync("/api/incidents", newIncident);
+        if (res.IsSuccessStatusCode)
+        {
+            await LoadIncidents();
+            newIncident = new Incident();
+        }
+    }
+
+    private async Task Delete(int id)
+    {
+    
+        if (IsUsingDummyData())
+        {
+            incidents.RemoveAll(i => i.Id == id);
+            StateHasChanged();
+            return;
+        }
+
+        var res = await Http.DeleteAsync($"/api/incidents/{id}");
+        if (res.IsSuccessStatusCode)
+        {
+            await LoadIncidents();
+        }
+    }
+
+    private async Task Edit(Incident inc)
+    {
+        editIncident = new Incident { Id = inc.Id, Status = inc.Status, Description = inc.Description,
+            EscalationLevel = inc.EscalationLevel };
+        
+    }
+
+    private async Task SaveEdit()
+    {
+        if (IsUsingDummyData())
+        {
+            var idx = incidents.FindIndex(i => i.Id == editIncident.Id);
+            if (idx >= 0) incidents[idx] = editIncident;
+            editIncident = null;
+            StateHasChanged();
+            return;
+        }
+
+        var res = await Http.PutAsJsonAsync($"/api/incidents/{editIncident.Id}", editIncident);
+        if (res.IsSuccessStatusCode)
+        {
+            await LoadIncidents();
+            editIncident = null;
+        }
+    }
+//     private async Task ForwardIncident(Incident inc)
+// {
+
+//     var response = await Http.PostAsJsonAsync("/api/incidents/forward", inc);
+//     if (response.IsSuccessStatusCode)
+//     {
+        
+//         await JSRuntime.InvokeVoidAsync("alert", $"Incident {inc.Id} wurde weitergeleitet!");
+//     }
+
+@inject IJSRuntime JSRuntime 
+
+private async Task ForwardIncident(Incident inc)
+{   
+    await JSRuntime.InvokeVoidAsync("alert", $"Incident {inc.Id} (EscalationLevel {inc.EscalationLevel}) wird weitergeleitet!");
+
+   
+    await Http.PostAsJsonAsync("/api/incidents/forward", inc);
+
+    // Optional: Feedback/Status/Meldung ausgeben
+}
+
+
+
+   
+    private bool IsUsingDummyData() => incidents?.FirstOrDefault()?.Description?.StartsWith("Dummy") ?? false;
+
+}

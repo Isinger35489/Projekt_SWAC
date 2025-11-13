@@ -1,0 +1,26 @@
+image clonen:
+git clone https://github.com/lsinger35489/Projekt_SWAC.git
+
+in den ordner wechseln: 
+cd Projekt_SWAC
+im ordner das terminal öffnen und folgendes eingeben: 
+docker-compose build
+
+somit erstellt ihr den docker bei euch auch lokal. 
+
+und danach muss docker-compose up -d eingegeben werden
+
+oder im terminal mit docker login anmelden
+
+docker pull is241308/projekt_swac-api:latest
+docker pull is241308/projekt_swac-web:latest
+
+somit habt ihr den letzten status vom docker.
+
+wenn ihr was geändert habt muss ihr es pushen:
+pfad zum Projekt_SWAC> docker tag projekt_swac-api:latest is241308/projekt_swac-api:latest
+pfad zum \Projekt_SWAC> docker tag projekt_swac-web:latest is241308/projekt_swac-web:latest
+
+und danach push: 
+Projekt_SWAC> docker push is241308/projekt_swac-web:latest
+Projekt_SWAC> docker push is241308/projekt_swac-api:latest

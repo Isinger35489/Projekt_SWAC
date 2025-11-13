@@ -1,0 +1,144 @@
+﻿@using SIMS.Core;
+@page "/users"
+@inject HttpClient Http
+
+<h3>Benutzerverwaltung</h3>
+
+<button @onclick="LoadMockData">Nur Frontend testen (Dummy-Daten laden)</button>
+<button @onclick="LoadUsers">Backend/Live-Daten laden</button>
+
+@if (users == null)
+{
+    <p>Lade Benutzer ...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Username</th>
+                <th>Rolle</th>
+                <th>Status</th>
+                <th>Aktion</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var user in users)
+            {
+                <tr>
+                    <td>@user.Id</td>
+                    <td>@user.Username</td>
+                    <td>@user.Role</td>
+                    <td>@(user.Enabled ? "Aktiv" : "Inaktiv")</td>
+                    <td>
+                        @if (user.Enabled)
+                        {
+                            <button @onclick="() => SetEnabled(user.Id, false)">Deaktivieren</button>
+                        }
+                        else
+                        {
+                            <button @onclick="() => SetEnabled(user.Id, true)">Aktivieren</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <hr/>
+    <h4>Neuen User anlegen</h4>
+    <input @bind="newUser.Username" placeholder="Username" />
+    <input @bind="newUser.PasswordHash" type="password" placeholder="Passwort" />
+    <input @bind="newUser.Email" placeholder="Email" />
+    <select @bind="newUser.Role">
+        <option value="Admin">Admin</option>
+        <option value="User">User</option>
+    </select>
+    <button @onclick="AddUser">Speichern</button>
+}
+
+@code {
+    private List<User> users;
+    private User newUser = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await LoadUsers();
+        }
+        catch
+        {
+            LoadMockData();
+        }
+    }
+
+    private async Task LoadUsers()
+    {
+        users = await Http.GetFromJsonAsync<List<User>>("/api/Users");
+        StateHasChanged();
+    }
+
+    private void LoadMockData()
+    {
+        users = new List<User>
+        {
+            new User{Id=1, Username="alice", Email="alice@fh.at", Role="Admin", Enabled=true, PasswordHash="pw1"},
+            new User{Id=2, Username="bob", Email="bob@fh.at", Role="User", Enabled=false, PasswordHash="pw2"}
+        };
+        StateHasChanged();
+    }
+
+    async Task AddUser()
+    {
+        if (IsDummy())
+        {
+            var nextId = users.Any() ? users.Max(u=>u.Id) + 1 : 1;
+            var localUser = new User {
+                Id = nextId,
+                Username = newUser.Username,
+                PasswordHash = newUser.PasswordHash,
+                Email = newUser.Email,
+                Role = newUser.Role,
+                Enabled = true
+            };
+            users.Add(localUser);
+            newUser = new();
+            StateHasChanged();
+            return;
+        }
+
+        var response = await Http.PostAsJsonAsync("/api/Users", newUser);
+        if(response.IsSuccessStatusCode)
+            users = await Http.GetFromJsonAsync<List<User>>("/api/Users");
+        newUser = new(); // Reset
+    }
+
+    async Task SetEnabled(int userId, bool enabled)
+    {
+        if (IsDummy())
+        {
+            var user = users.FirstOrDefault(u => u.Id == userId);
+            if(user != null) user.Enabled = enabled;
+            StateHasChanged();
+            return;
+        }
+
+        var patchData = new { enabled = enabled };
+        await Http.PatchAsJsonAsync($"/api/Users/{userId}/enabled", patchData);
+        users = await Http.GetFromJsonAsync<List<User>>("/api/Users");
+    }
+
+    private bool IsDummy() => users?.FirstOrDefault()?.Email?.EndsWith("@fh.at") ?? false;
+
+    public class User
+    {
+        public int Id {get;set;}
+        public string Username {get;set;}
+        public string PasswordHash {get;set;}
+        public string Email {get;set;}
+        public string Role {get;set;}
+        public bool Enabled {get;set;}
+    }
+}
