@@ -9,15 +9,26 @@ namespace SIMS.API.Controllers
     public class IncidentsController : ControllerBase
     {
         private readonly SimsDbContext _context;
-        public IncidentsController(SimsDbContext context) => _context = context;
-
-        [HttpGet]
+        private readonly RedisSessionService _redisService;
+        public IncidentsController(SimsDbContext context, RedisSessionService redisService)
+        {
+            _context = context;
+            _redisService = redisService;
+        }
+       [HttpGet]
         public async Task<ActionResult<IEnumerable<Incident>>> GetAll()
-            => await _context.Incidents.ToListAsync();
+        {
+            // In Redis loggen
+            _redisService.SetSession("last_access", DateTime.Now.ToString());
+            
+            return await _context.Incidents.ToListAsync();
+        }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Incident>> Get(int id)
         {
+            _redisService.SetSession($"incident:{id}:last_viewed", DateTime.Now.ToString());
+
             var incident = await _context.Incidents.FindAsync(id);
             return incident ?? (ActionResult<Incident>)NotFound();
         }
@@ -27,6 +38,10 @@ namespace SIMS.API.Controllers
         {
             _context.Incidents.Add(incident);
             await _context.SaveChangesAsync();
+
+            _redisService.SetSession($"incident:{incident.Id}:created", DateTime.Now.ToString());
+            _redisService.SetSession("last_incident_created", incident.Id.ToString());
+
             return CreatedAtAction(nameof(Get), new { id = incident.Id }, incident);
         }
 
@@ -37,6 +52,10 @@ namespace SIMS.API.Controllers
 
             _context.Entry(incident).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+
+            _redisService.SetSession($"incident:{id}:last_updated", DateTime.Now.ToString());
+
+
             return NoContent();
         }
 
@@ -48,6 +67,10 @@ namespace SIMS.API.Controllers
 
             _context.Incidents.Remove(toDelete);
             await _context.SaveChangesAsync();
+
+            _redisService.SetSession($"incident:{id}:deleted", DateTime.Now.ToString());
+
+
             return NoContent();
         }
     }

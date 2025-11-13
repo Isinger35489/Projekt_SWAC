@@ -45,6 +45,10 @@ cd Docker
 docker-compose up -d
 
 ### 3. Datenbank initialisieren
+### 3.1 SQL Container starten (falls nicht schon geschehen)
+docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=YourStrong@Passw0rd" -p 1433:1433 --name db-1 --hostname db-1 -d mcr.microsoft.com/mssql/server:2022-latest
+
+
 
 docker exec -it sims-sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "YourStrong@Passw0rd" -i /docker-entrypoint-initdb.d/create_database.sql
 
