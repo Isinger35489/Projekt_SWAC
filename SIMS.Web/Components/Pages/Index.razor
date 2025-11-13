@@ -1,0 +1,19 @@
+﻿@page "/"
+@inject NavigationManager Navigation
+
+@if (!_navigated)
+{
+    <div>Redirecting...</div>
+}
+
+@code {
+    private bool _navigated = false;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_navigated)
+        {
+            _navigated = true;
+            Navigation.NavigateTo("/account/login", true);
+        }
+    }
+}
