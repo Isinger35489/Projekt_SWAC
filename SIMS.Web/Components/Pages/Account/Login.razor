@@ -1,0 +1,50 @@
+﻿@page "/account/login"
+@inject NavigationManager Navigation
+@using System.ComponentModel.DataAnnotations
+
+<h3>Login</h3>
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+<EditForm Model="credential" OnValidSubmit="DoLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div>
+        <label>User Name:</label>
+        <InputText @bind-Value="credential.UserName" />
+        <ValidationMessage For="@(() => credential.UserName)" />
+    </div>
+    <div>
+        <label>Password:</label>
+        <InputText @bind-Value="credential.Password" type="password" />
+        <ValidationMessage For="@(() => credential.Password)" />
+    </div>
+    <button type="submit">Login</button>
+</EditForm>
+@code {
+    private Credential credential = new();
+    private string errorMessage;
+
+    private async Task DoLogin()
+    {
+        errorMessage = "";
+        if (credential.UserName == "admin" && credential.Password == "geheim") 
+        {
+            Navigation.NavigateTo("/home");
+        }
+        else
+        {
+            errorMessage = "Ungültiger Benutzername oder Passwort!";
+        }
+    }
+    public class Credential
+    {
+        [Required]
+        [Display(Name = "User Name")]
+        public string UserName { get; set; }
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; }
+    }
+}
