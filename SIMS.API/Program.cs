@@ -8,8 +8,13 @@ namespace SIMS.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            //weil ohne dass die umgeänderte variante von appsetings nicht übernommen werden kann, da im web auch eine appsettings vorhanden ist,
+            //kommt es sonst beim docker build zu einem fehler (normale bei multi-container)
+
+            builder.Configuration.AddJsonFile("appsettings-api.json", optional: true, reloadOnChange: true);
+
             // Add services to the container.
-                        builder.Services.AddControllers();
+            builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
