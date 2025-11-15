@@ -4,10 +4,20 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
+
+COPY SIMS.Core/SIMS.Core.csproj ./SIMS.Core/
+COPY SIMS.Web/SIMS.Web.csproj ./SIMS.Web/
+COPY SIMS.API/SIMS.API.csproj ./SIMS.API/
+
+RUN dotnet restore SIMS.API/SIMS.API.csproj
+
 COPY SIMS.Core ./SIMS.Core
 COPY SIMS.Web ./SIMS.Web
 COPY SIMS.API ./SIMS.API
+
 WORKDIR /src/SIMS.API
+RUN dotnet build -c Release
+
 RUN dotnet publish -c Release -o /app
 
 FROM base AS final

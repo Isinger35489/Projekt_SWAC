@@ -17,7 +17,7 @@ COPY SIMS.Web ./SIMS.Web
 COPY SIMS.API ./SIMS.API
 
 WORKDIR /src/SIMS.Web
-RUN dotnet build ./SIMS.Web.csproj -c Release --no-restore
+RUN dotnet build ./SIMS.Web.csproj -c Release
 
 RUN dotnet publish ./SIMS.Web.csproj -c Release -o /publish/web
 
