@@ -57,7 +57,7 @@
 
     private async Task DoLogin()
     {
-        var response = await Http.PostAsJsonAsync("https://localhost.com/api/login", credential);
+        var response = await Http.PostAsJsonAsync("https://localhost:7168/api/login", credential);
 
         if (response.IsSuccessStatusCode)
         {
