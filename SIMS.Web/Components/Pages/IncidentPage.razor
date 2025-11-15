@@ -1,184 +1,408 @@
 ﻿@using SIMS.Core;
+@using SIMS.API;
 @page "/incidents"
 @inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@inject LoginState UserState
+@* 
+@if (!UserState.IsLoggedIn)
+{
+    Navigation.NavigateTo("/account/login", true);
+    <div>Umleitung zum Login...</div>
+    return;
+} *@
+
+@if (showRedirectMessage)
+{
+    <div class="alert alert-info">
+        <p>Sie sind nicht angemeldet. Weiterleitung zum Login...</p>
+    </div>
+}
+else
+{
+    @* wenn eingeloggt, geschützte Seite anzeigen *@
+    
+
 
 <h3>Incidents</h3>
 
-<button @onclick="LoadMockData">Nur Frontend testen (Dummy-Daten laden)</button>
-<button @onclick="LoadIncidents">Backend/Live-Daten laden</button>
+@* Benachrichtigung für User, das sie nur daten laden aber nicht ändern können. *@
+@if (UserState.Role == RoleType.User)
+{
+    <div style="color: #555; background: #eef; padding: 6px 12px; border-radius: 6px; margin-bottom: 8px;">
+        Du kannst nur ansehen, nicht bearbeiten.
+    </div>
+}
+    <button @onclick="LoadMockData">Nur Frontend testen (Dummy-Daten laden)</button>
+    <button @onclick="LoadIncidents">Backend/Live-Daten laden</button>
 
+        @*Laden der Incidents entwerder dummy oder aus sql *@
 @if (incidents == null)
 {
     <p>Lade Daten...</p>
 }
 else
 {
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Status</th>
-            <th>Beschreibung</th>
-            <th>Alert-Level</th>
-            <th>Aktionen</th>
-        </tr>
-        @foreach (var inc in incidents)
-        {
+    <table class="table">
+        <thead>
             <tr>
-                <td>@inc.Id</td>
-                <td>@inc.Status</td>
-                <td>@inc.Description</td>
-              <td>@inc.EscalationLevel</td>
-        <td>
-            <button @onclick="() => Edit(inc)">Bearbeiten</button>
-            <button @onclick="() => Delete(inc.Id)">Löschen</button>
-            @if (inc.EscalationLevel >= 3)  //3 ist AlertLevel
+                <th>ID</th>
+                <th>Status</th>
+                <th>Beschreibung</th>
+                <th>Alert-Level</th>
+                <th>Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var inc in incidents)
             {
-                <button @onclick="() => ForwardIncident(inc)">Weiterleiten</button>
+                @if (editIncident != null && editIncident.Id == inc.Id)
+                {
+                    <!-- Edit-Modus -->
+                    <tr style="background-color: #ffffcc;">
+                        <td>@inc.Id</td>
+                        <td><input @bind="editIncident.Status" /></td>
+                        <td><input @bind="editIncident.Description" /></td>
+                        <td><input type="number" @bind="editIncident.EscalationLevel" /></td>
+                        <td>
+                          @*   nur admin kann speichern und abbrechen *@
+                             @if (UserState.Role == RoleType.Admin)
+                             {
+                            <button @onclick="SaveEdit">Speichern</button>
+                            <button @onclick="CancelEdit">Abbrechen</button>
+                             }
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    <!-- Normal-Modus -->
+                    <tr>
+                        <td>@inc.Id</td>
+                        <td>@inc.Status</td>
+                        <td>@inc.Description</td>
+                        <td>@inc.EscalationLevel</td>
+                        <td>
+                              @*   nur admin kann ändern, löschen, und weiterleiten *@
+                            @if (UserState.Role == RoleType.Admin)
+                            {
+                                <button @onclick="() => Edit(inc)">Bearbeiten</button>
+                                <button @onclick="() => Delete(inc.Id)">Löschen</button>
+                            }
+                            
+                            @if (inc.EscalationLevel >= 3 && UserState.Role == RoleType.Admin)
+                            {
+                               <button @onclick="() => ForwardIncident(inc)">Weiterleiten</button>
+                            }
+                            
+                        </td>
+                    </tr>
+                }
             }
-        </td>
-    </tr>
-          
-        }
+        </tbody>
     </table>
 
-    <h4>Neues Incident anlegen:</h4>
-    <input @bind="newIncident.Status" placeholder="Status" />
-    <input @bind="newIncident.Description" placeholder="Beschreibung" />
-    <input type="number" @bind="newIncident.EscalationLevel" placeholder="Escalation Level" />
-    <button @onclick="Add">Anlegen</button>
-}
+    @* Nur admin kann eingabeformular sehen*@
+@if (UserState.Role == RoleType.Admin)
+    {
+        <hr />
+        <h4>Neues Incident anlegen:</h4>
+        @*  input *@
+        @* <input @bind="newIncident.ReporterId" type="number" placeholder="ReporterId" />
+<input @bind="newIncident.HandlerId" type="number" placeholder="HandlerId" />
+<input @bind="newIncident.Status" placeholder="Status" />
+<input @bind="newIncident.Description" placeholder="Beschreibung" />
+<input @bind="newIncident.Severity" placeholder="Severity" />
+<input @bind="newIncident.CVE" placeholder="CVE" />
+<input @bind="newIncident.EscalationLevel" type="number" placeholder="Escalation Level" />
+<input @bind="newIncident.System" placeholder="System" />
+<input @bind="newIncident.CreatedAt" type="datetime-local" />
+<input @bind="newIncident.ClosedAt" type="datetime-local" />
+<button @onclick="Add">Anlegen</button> *@
 
+        <EditForm Model="newIncident" OnValidSubmit="Add" FormName="IncidentForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div> <InputNumber @bind-Value="newIncident.ReporterId" placeholder="ReporterId *" />
+                <ValidationMessage For="@(() => newIncident.ReporterId)" />     </div>
+            <div>  <InputNumber @bind-Value="newIncident.HandlerId" placeholder="HandlerId *" />
+                <ValidationMessage For="@(() => newIncident.HandlerId)" />     </div>
+            <div> <InputText @bind-Value="newIncident.Status" placeholder="Status *" />
+                <ValidationMessage For="@(() => newIncident.Status)" />     </div>
+            <div> <InputText @bind-Value="newIncident.Description" placeholder="Beschreibung *" />
+                <ValidationMessage For="@(() => newIncident.Description)" />     </div>
+            <div>
+                <InputText @bind-Value="newIncident.Severity" placeholder="Severity *" />
+                <ValidationMessage For="@(() => newIncident.Severity)" />     </div>
+            <div>
+                <InputText @bind-Value="newIncident.CVE" placeholder="CVE (optional)" />     </div>
+            <div>
+                <InputNumber @bind-Value="newIncident.EscalationLevel" placeholder="Escalation Level *" />
+                <ValidationMessage For="@(() => newIncident.EscalationLevel)" />     </div>
+            <div>
+                <InputText @bind-Value="newIncident.System" placeholder="System *" />
+                <ValidationMessage For="@(() => newIncident.System)" />     </div>
+            <div>
+                <InputDate @bind-Value="newIncident.CreatedAt" />
+                <ValidationMessage For="@(() => newIncident.CreatedAt)" />     </div>
+            <div>
+                <InputDate @bind-Value="newIncident.ClosedAt" placeholder="Closed At (optional)" />     </div>
+            <button type="submit">Anlegen</button>
+        </EditForm>
+    }
+
+
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div style="color: red; margin-top: 10px;">@errorMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div style="color: green; margin-top: 10px;">@successMessage</div>
+    }
+}
+}
+@* codeblock für Laden von den incidents aus sql oder dummy*@
 @code {
+    private bool showRedirectMessage = false;
+
+    protected override void OnInitialized()
+    {
+        if (!UserState.IsLoggedIn)
+        {
+            showRedirectMessage = true;
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender && !UserState.IsLoggedIn)
+        {
+            Navigation.NavigateTo("/account/login", true);
+        }
+    }
+
     private List<Incident> incidents;
     private Incident newIncident = new Incident();
     private Incident editIncident;
+    private string errorMessage = "";
+    private string successMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            await LoadIncidents(); 
+            await LoadIncidents();
         }
-        catch
+        catch (Exception ex)
         {
-            await LoadMockData(); 
+            errorMessage = $"Fehler beim Laden: {ex.Message}";
+            await LoadMockData();
         }
     }
 
+    @* Laden von Incidents aus api*@
     private async Task LoadIncidents()
     {
-        incidents = await Http.GetFromJsonAsync<List<Incident>>("/api/incidents");
+        try
+        {
+            errorMessage = "";
+            successMessage = "";
+            incidents = await Http.GetFromJsonAsync<List<Incident>>("api/incidents");
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Backend-Fehler: {ex.Message}";
+        }
+    }
+    @*Laden von incidents aus dummy *@
+    private Task LoadMockData()
+    {
+        incidents = new List<Incident>
+        {
+            new Incident { Id = 1, Status = "Offen", Description = "Dummy-Incident 1", EscalationLevel = 2 },
+            new Incident { Id = 2, Status = "In Bearbeitung", Description = "Dummy-Incident 2", EscalationLevel = 4 }
+        };
+        successMessage = "Dummy-Daten geladen";
         StateHasChanged();
+        return Task.CompletedTask;
     }
 
- private Task LoadMockData()
-{
-    incidents = new List<Incident>
-    {
-        new Incident { Id = 1, Status = "Offen", Description = "Dummy-Incident 1", EscalationLevel = 2 },
-        new Incident { Id = 2, Status = "In Bearbeitung", Description = "Dummy-Incident 2", EscalationLevel = 4 } 
-    };
-    StateHasChanged();
-    return Task.CompletedTask;
-}
-
-
+    @* anlegen von daten*@
     private async Task Add()
     {
-        if (incidents.Any(i => i.Id == newIncident.Id))
-            return; 
+        errorMessage = "";
+        successMessage = "";
 
+        if (incidents.Any(i => i.Id == newIncident.Id))
+        {
+            errorMessage = "ID existiert bereits";
+            return;
+        }
+@*wenn dummy daten geladen werden müssen *@
         if (IsUsingDummyData())
         {
             var nextId = incidents.Any() ? incidents.Max(i => i.Id) + 1 : 1;
-            var localCopy = new Incident 
-            { Id = nextId, 
-              Status = newIncident.Status,
-              Description = newIncident.Description, 
-              EscalationLevel = newIncident.EscalationLevel
+            var localCopy = new Incident
+            {
+                Id = nextId,
+                Status = newIncident.Status,
+                Description = newIncident.Description,
+                EscalationLevel = newIncident.EscalationLevel
             };
             incidents.Add(localCopy);
             newIncident = new Incident();
+            successMessage = "Incident (Dummy) hinzugefügt";
             StateHasChanged();
             return;
         }
 
-     
-        var res = await Http.PostAsJsonAsync("/api/incidents", newIncident);
-        if (res.IsSuccessStatusCode)
+        try
         {
-            await LoadIncidents();
-            newIncident = new Incident();
+            var res = await Http.PostAsJsonAsync("api/incidents", newIncident);
+            if (res.IsSuccessStatusCode)
+            {
+                await LoadIncidents();
+                newIncident = new Incident();
+                successMessage = "Incident erfolgreich hinzugefügt";
+            }
+            else
+            {
+                errorMessage = $"Fehler: {res.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Fehler beim Hinzufügen: {ex.Message}";
         }
     }
-
+    @* löschen von daten*@
     private async Task Delete(int id)
     {
-    
+        errorMessage = "";
+        successMessage = "";
+
         if (IsUsingDummyData())
         {
             incidents.RemoveAll(i => i.Id == id);
+            successMessage = "Incident (Dummy) gelöscht";
             StateHasChanged();
             return;
         }
 
-        var res = await Http.DeleteAsync($"/api/incidents/{id}");
-        if (res.IsSuccessStatusCode)
+        try
         {
-            await LoadIncidents();
+            var res = await Http.DeleteAsync($"api/incidents/{id}");
+            if (res.IsSuccessStatusCode)
+            {
+                await LoadIncidents();
+                successMessage = "Incident erfolgreich gelöscht";
+            }
+            else
+            {
+                errorMessage = $"Fehler beim Löschen: {res.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Fehler beim Löschen: {ex.Message}";
         }
     }
-
-    private async Task Edit(Incident inc)
+    @* editieren von daten*@
+    private void Edit(Incident inc)
     {
-        editIncident = new Incident { Id = inc.Id, Status = inc.Status, Description = inc.Description,
-            EscalationLevel = inc.EscalationLevel };
-        
+        editIncident = new Incident
+        {
+            Id = inc.Id,
+            Status = inc.Status,
+            Description = inc.Description,
+            EscalationLevel = inc.EscalationLevel
+        };
     }
-
+@* Abbrechen von editieren*@
+    private void CancelEdit()
+    {
+        editIncident = null;
+        errorMessage = "";
+    }
+    @*daten werden gespeichert *@
     private async Task SaveEdit()
     {
+        errorMessage = "";
+        successMessage = "";
+
         if (IsUsingDummyData())
         {
             var idx = incidents.FindIndex(i => i.Id == editIncident.Id);
-            if (idx >= 0) incidents[idx] = editIncident;
+            if (idx >= 0)
+            {
+                incidents[idx] = new Incident
+                {
+                    Id = editIncident.Id,
+                    Status = editIncident.Status,
+                    Description = editIncident.Description,
+                    EscalationLevel = editIncident.EscalationLevel
+                };
+            }
             editIncident = null;
+            successMessage = "Incident (Dummy) aktualisiert";
             StateHasChanged();
             return;
         }
 
-        var res = await Http.PutAsJsonAsync($"/api/incidents/{editIncident.Id}", editIncident);
-        if (res.IsSuccessStatusCode)
+        try
         {
-            await LoadIncidents();
-            editIncident = null;
+            var res = await Http.PutAsJsonAsync($"api/incidents/{editIncident.Id}", editIncident);
+            if (res.IsSuccessStatusCode)
+            {
+                await LoadIncidents();
+                editIncident = null;
+                successMessage = "Incident erfolgreich aktualisiert";
+            }
+            else
+            {
+                errorMessage = $"Fehler beim Aktualisieren: {res.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Fehler beim Aktualisieren: {ex.Message}";
         }
     }
-//     private async Task ForwardIncident(Incident inc)
-// {
+    @* weiterleiten von incidents*@
+    private async Task ForwardIncident(Incident inc)
+    {
+        errorMessage = "";
+        successMessage = "";
 
-//     var response = await Http.PostAsJsonAsync("/api/incidents/forward", inc);
-//     if (response.IsSuccessStatusCode)
-//     {
-        
-//         await JSRuntime.InvokeVoidAsync("alert", $"Incident {inc.Id} wurde weitergeleitet!");
-//     }
+        await JSRuntime.InvokeVoidAsync("alert", $"Incident {inc.Id} (EscalationLevel {inc.EscalationLevel}) wird weitergeleitet!");
 
-@inject IJSRuntime JSRuntime 
+        if (IsUsingDummyData())
+        {
+            successMessage = $"Incident {inc.Id} (Dummy) weitergeleitet";
+            return;
+        }
 
-private async Task ForwardIncident(Incident inc)
-{   
-    await JSRuntime.InvokeVoidAsync("alert", $"Incident {inc.Id} (EscalationLevel {inc.EscalationLevel}) wird weitergeleitet!");
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/incidents/forward", inc);
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = $"Incident {inc.Id} erfolgreich weitergeleitet";
+            }
+            else
+            {
+                errorMessage = $"Fehler beim Weiterleiten: {response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Fehler beim Weiterleiten: {ex.Message}";
+        }
+    }
 
-   
-    await Http.PostAsJsonAsync("/api/incidents/forward", inc);
-
-    // Optional: Feedback/Status/Meldung ausgeben
-}
-
-
-
-   
     private bool IsUsingDummyData() => incidents?.FirstOrDefault()?.Description?.StartsWith("Dummy") ?? false;
-
 }

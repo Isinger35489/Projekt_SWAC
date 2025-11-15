@@ -1,5 +1,7 @@
 ﻿@page "/account/login"
+@inject LoginState UserState
 @inject NavigationManager Navigation
+@using SIMS.Core;
 @using System.ComponentModel.DataAnnotations
 
 <h3>Login</h3>
@@ -7,7 +9,10 @@
 {
     <div class="alert alert-danger">@errorMessage</div>
 }
-<EditForm Model="credential" OnValidSubmit="DoLogin">
+
+@* Formular für login *@
+
+<EditForm Model="credential" OnValidSubmit="DoLogin" FormName="login-form">
     <DataAnnotationsValidator />
     <ValidationSummary />
     <div>
@@ -22,6 +27,9 @@
     </div>
     <button type="submit">Login</button>
 </EditForm>
+
+@* Codeblock für login *@
+
 @code {
     private Credential credential = new();
     private string errorMessage;
@@ -31,6 +39,14 @@
         errorMessage = "";
         if (credential.UserName == "admin" && credential.Password == "geheim") 
         {
+            UserState.Username = "admin";
+            UserState.Role = RoleType.Admin;
+            Navigation.NavigateTo("/home");
+           }
+        else if (credential.UserName == "user" && credential.Password == "secret")
+        {
+            UserState.Username = "user";
+            UserState.Role = RoleType.User;
             Navigation.NavigateTo("/home");
         }
         else

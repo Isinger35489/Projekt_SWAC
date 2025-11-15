@@ -1,18 +1,41 @@
-﻿namespace SIMS.Core
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SIMS.Core
 {
     public class Incident
     {
-            public int Id { get; set; }
-            public int ReporterId { get; set; }
-            public int HandlerId { get; set; }
-            public string Description { get; set; }
-            public string Severity { get; set; }
-            public string Status { get; set; }
-            public string CVE { get; set; }
-            public int EscalationLevel { get; set; }
-            public string System { get; set; }
-            public DateTime CreatedAt { get; set; }
-            public DateTime? ClosedAt { get; set; }
+        [Required]
+        public int Id { get; set; }
+
+        [Required]
+        public int ReporterId { get; set; }
+
+        [Required]
+        public int HandlerId { get; set; }
+
+        [Required]
+        public string Description { get; set; }
+
+        [Required]
+        public string Severity { get; set; }
+
+        [Required]
+        public string Status { get; set; }
+
+        //optional daher kein required verwendet
+        public string CVE { get; set; }
+
+        [Required]
+        public int EscalationLevel { get; set; }
+
+        [Required]
+        public string System { get; set; }
+
+        [Required]
+        public DateTime CreatedAt { get; set; }
+
+        //optional daher kein required verwendet
+        public DateTime? ClosedAt { get; set; }
         }
 
     }

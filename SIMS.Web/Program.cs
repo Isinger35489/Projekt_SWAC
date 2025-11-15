@@ -14,6 +14,8 @@ namespace SIMS.Web
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
+            // OPTIONAL: DbContext nur falls Web direkt auf DB zugreift
+            // Wenn nur über API, dann diese Zeile entfernen
             builder.Services.AddHttpClient();
 
             builder.Services.AddDbContext<SimsDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnetion")));
@@ -21,8 +23,12 @@ namespace SIMS.Web
             var apiBase = Environment.GetEnvironmentVariable("API_URI_BASE") ?? "https://localhost:7168";
             builder.Services.AddScoped(sp => new HttpClient
             {
-                BaseAddress = new Uri(apiBase)
+                BaseAddress = new Uri(apiBase),
+                Timeout = TimeSpan.FromSeconds(30)
             });
+
+            builder.Services.AddScoped<LoginState>();
+
 
             //
             //builder.Services.AddScoped(sp => new HttpClient
