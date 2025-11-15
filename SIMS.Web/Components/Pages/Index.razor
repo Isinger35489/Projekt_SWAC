@@ -1,7 +1,7 @@
 ﻿@page "/"
 @inject NavigationManager Navigation
 @inject LoginState UserState
-
+@* 
 @if (!_navigated)
 {
     <div>Redirecting...</div>
@@ -16,5 +16,20 @@
             _navigated = true;
             Navigation.NavigateTo("/account/login", true);
         }
+    }
+} *@
+@* 
+@page "/"
+@inject NavigationManager Navigation
+ *@
+@if (true)
+{
+    <div>Sie sind nicht angemeldet. Weiterleitung zum Login...</div>
+}
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        Navigation.NavigateTo("/account/login", true);
     }
 }
