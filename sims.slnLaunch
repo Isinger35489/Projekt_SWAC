@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "API&Web",
+    "Projects": [
+      {
+        "Path": "SIMS.Web\\SIMS.Web.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      },
+      {
+        "Path": "SIMS.API\\SIMS.API.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      }
+    ]
+  }
+]
