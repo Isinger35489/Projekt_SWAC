@@ -13,7 +13,7 @@
 }
 
 @* Formular für login *@
-
+@*1ste variante*@
 @* <EditForm Model="credential" OnValidSubmit="DoLogin" FormName="login-form">
     <DataAnnotationsValidator /> *@
    @*  <ValidationSummary />
@@ -30,6 +30,7 @@
     <button type="submit">Login</button>
 </EditForm> *@
 
+@*2 variante*@
 <EditForm Model="credential" OnValidSubmit="DoLogin">
     <DataAnnotationsValidator />
     
@@ -57,6 +58,13 @@
 
     private async Task DoLogin()
     {
+
+
+        // //zum testen ist man dauernd als admin eingeloggt
+        //     UserState.Username = "admin";
+        //     UserState.Role = RoleType.Admin;
+        //     Navigation.NavigateTo("/home");
+
         var response = await Http.PostAsJsonAsync("https://localhost:7168/api/login", credential);
 
         if (response.IsSuccessStatusCode)
