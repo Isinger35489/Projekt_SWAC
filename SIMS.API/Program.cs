@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using SIMS.Core;
+//using Microsoft.EntityFrameworkCore.Metadata.Internal;
+//using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
+//using SIMS.Core;
+using SIMS.Core.Classes;
 using StackExchange.Redis;
 
 namespace SIMS.API
@@ -90,20 +93,32 @@ namespace SIMS.API
 
 
                     //});
+                   
+                        context.Users.Add(new User
+                    {
+                        Username = "adminia",
+                        PasswordHash = "geheim",
+                        Email = "sdlkfjas@klasdjf.com",
+                        Role = "Administrator",
+                        Enabled = true,
+                        CreatedAt = DateTime.Now
 
-                    //context.Users.Add(new User
-                    //{
-                    //    Username = "admin",
-                    //    PasswordHash = "hashedpassword",
-                    //    Email = "sdlkfjas@klasdjf.com",
-                    //    Role = "Administrator",
-                    //    Enabled = true,
-                    //    CreatedAt = DateTime.Now
-                        
 
-                    //});
+                    });
 
-                    context.SaveChanges();
+                        context.Users.Add(new User
+                        {
+                            Username = "peter",
+                            PasswordHash = "lustig",
+                            Email = "sdlkfjas@klasdjf.com",
+                            Role = "user",
+                            Enabled = true,
+                            CreatedAt = DateTime.Now
+
+
+                        });
+
+                        context.SaveChanges();
 
                 }
                 catch (Exception ex)

@@ -1,4 +1,4 @@
-namespace SIMS.Core;
+namespace SIMS.Core.Classes;
 
 public class Program
 {
