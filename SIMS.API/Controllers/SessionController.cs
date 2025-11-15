@@ -12,6 +12,7 @@ namespace SIMS.API.Controllers
                 _service = service;
             }
 
+
             [HttpPost]
             public IActionResult Set([FromQuery] string key, [FromQuery] string value)
             {

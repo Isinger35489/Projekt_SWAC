@@ -39,8 +39,10 @@ namespace SIMS.API
 
             // Add services to the container.
             builder.Services.AddControllers();
+            
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            
 
 
             //container starten: docker run -d --name redis-1 -p 6379:6379 redis:latest
@@ -68,32 +70,38 @@ namespace SIMS.API
                 {
                     var context = svc.GetRequiredService<SimsDbContext>();
 
-                    context.Incidents.Add(new Incident
-                    {
-                        ReporterId = 8,
-                        HandlerId = 12,
-                        Description = "Server down",
-                        Severity = "High",
-                        Status = "In Work",
-                        CVE = "CVE129",
-                        EscalationLevel = 2,
-                        System = "WebServer01",
-                        CreatedAt = DateTime.Now
+                    Console.WriteLine("Running database migrations...");
+                    context.Database.Migrate();
+                    Console.WriteLine("Migrations completed successfully!");
 
 
-                    });
 
-                    context.Users.Add(new User
-                    {
-                        Username = "admin",
-                        PasswordHash = "hashedpassword",
-                        Email = "sdlkfjas@klasdjf.com",
-                        Role = "Administrator",
-                        Enabled = true,
-                        CreatedAt = DateTime.Now
+                    //context.Incidents.Add(new Incident
+                    //{
+                    //    ReporterId = 8,
+                    //    HandlerId = 12,
+                    //    Description = "Server down",
+                    //    Severity = "High",
+                    //    Status = "In Work",
+                    //    CVE = "CVE129",
+                    //    EscalationLevel = 2,
+                    //    System = "WebServer01",
+                    //    CreatedAt = DateTime.Now
+
+
+                    //});
+
+                    //context.Users.Add(new User
+                    //{
+                    //    Username = "admin",
+                    //    PasswordHash = "hashedpassword",
+                    //    Email = "sdlkfjas@klasdjf.com",
+                    //    Role = "Administrator",
+                    //    Enabled = true,
+                    //    CreatedAt = DateTime.Now
                         
 
-                    });
+                    //});
 
                     context.SaveChanges();
 
