@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SIMS.API;
-using SIMS.Core;
+using SIMS.Core.Classes;
 
 namespace SIMS.API.Controllers
 {

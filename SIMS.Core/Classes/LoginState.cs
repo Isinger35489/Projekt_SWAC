@@ -1,4 +1,4 @@
-﻿using SIMS.Core;
+﻿using SIMS.Core.Classes;
 
 public class LoginState
 {

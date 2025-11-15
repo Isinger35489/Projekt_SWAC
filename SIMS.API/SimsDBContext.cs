@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SIMS.Core;
-using SIMS.API;
-using SIMS;
+//using SIMS.API;
+//using SIMS;
+using SIMS.Core.Classes;
 
 namespace SIMS.API
 {

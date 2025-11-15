@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SIMS.Core
+namespace SIMS.Core.Classes
 {
     public class Incident
     {

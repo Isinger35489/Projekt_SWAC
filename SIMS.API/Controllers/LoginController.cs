@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
+﻿//using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using SIMS.Core.Classes;
+//using SIMS.Core;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace SIMS.API.Controllers
@@ -12,31 +13,92 @@ namespace SIMS.API.Controllers
     public class LoginController : ControllerBase
     {
         private readonly SimsDbContext _context;
+        private readonly RedisSessionService _redisSession;
 
-        public LoginController(SimsDbContext context)
+        public LoginController(SimsDbContext context, RedisSessionService redisSession)
         {
             _context = context;
+            _redisSession = redisSession;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login([FromBody] LoginState loginState)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request) //ist angegeben 
         {
+            // Validate input
+            if (string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Password))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Username and password are required"
+                });
+            }
+
+            // Find user in database
             var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Username == loginState.Username);
+                .FirstOrDefaultAsync(u => u.Username == request.Username);
 
             if (user == null)
-                return Unauthorized("Invalid username or password");
+            {
+                return Unauthorized(new
+                {
+                    success = false,
+                    message = "Invalid username or password"
+                });
+            }
 
-            // Verify password (assuming you hash it)
+            // Check if user is enabled
+            if (!user.Enabled)
+            {
+                return Unauthorized(new
+                {
+                    success = false,
+                    message = "Your account has been disabled. Please contact administrator."
+                });
+            }
 
-            if (user.Username != loginState.Username)
-                return Unauthorized("Invalid username or password");
+            // Verify password
+            // NOTE: For university project - in production use BCrypt!
+            // This compares plain text - NOT SECURE for real apps!
+            if (user.PasswordHash != request.Password)
+            {
+                return Unauthorized(new
+                {
+                    success = false,
+                    message = "Invalid username or password"
+                });
+            }
 
-            // If valid, you could return a JWT token or success message
-            return Ok(user);
+            // Create session in Redis
+            var sessionId = Guid.NewGuid().ToString();
+            var sessionData = $"{user.Id}|{user.Username}|{user.Role}";
+            _redisSession.SetSession($"session:{sessionId}", sessionData);
+
+            // Return success response
+            return Ok(new
+            {
+                success = true,
+                message = "Login successful",
+                sessionId = sessionId,
+                user = new
+                {
+                    id = user.Id,
+                    username = user.Username,
+                    email = user.Email,
+                    role = user.Role
+                }
+            });
         }
+
+        //[HttpPost("logout")]
+        //public IActionResult Logout([FromBody] LogoutRequest request)
+        //{
+        //    // In production, you would delete the session from Redis here
+        //    return Ok(new { success = true, message = "Logout successful" });
+        //}
     }
 }
+
 //    public class LoginController : ControllerBase
 //    {
 //        private readonly SimsDbContext _context;

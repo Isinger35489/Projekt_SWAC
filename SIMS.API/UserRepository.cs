@@ -1,4 +1,5 @@
 ﻿using SIMS.Core;
+using SIMS.Core.Classes;
 
 namespace SIMS.API
 {
