@@ -1,6 +1,7 @@
 ﻿@using SIMS.Core;
 @using SIMS.API;
 @page "/users"
+@rendermode InteractiveServer 
 @inject NavigationManager Navigation
 @inject LoginState UserState
 @inject HttpClient Http
@@ -113,16 +114,17 @@ else
         if (!UserState.IsLoggedIn)
         {
             showRedirectMessage = true;
-        }
-    }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender && !UserState.IsLoggedIn)
-        {
             Navigation.NavigateTo("/account/login", true);
         }
     }
+
+    // protected override void OnAfterRender(bool firstRender)
+    // {
+    //     if (firstRender && !UserState.IsLoggedIn)
+    //     {
+    //         Navigation.NavigateTo("/account/login", true);
+    //     }
+    // }
 
     private List<User> users;
     private User newUser = new();

@@ -1,6 +1,8 @@
 ﻿@page "/account/login"
+@inject HttpClient Http
 @inject LoginState UserState
 @inject NavigationManager Navigation
+@rendermode InteractiveServer 
 @using SIMS.Core;
 @using System.ComponentModel.DataAnnotations
 
@@ -12,9 +14,9 @@
 
 @* Formular für login *@
 
-<EditForm Model="credential" OnValidSubmit="DoLogin" FormName="login-form">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+@* <EditForm Model="credential" OnValidSubmit="DoLogin" FormName="login-form">
+    <DataAnnotationsValidator /> *@
+   @*  <ValidationSummary />
     <div>
         <label>User Name:</label>
         <InputText @bind-Value="credential.UserName" />
@@ -26,7 +28,26 @@
         <ValidationMessage For="@(() => credential.Password)" />
     </div>
     <button type="submit">Login</button>
+</EditForm> *@
+
+<EditForm Model="credential" OnValidSubmit="DoLogin">
+    <DataAnnotationsValidator />
+    
+    <div class="form-group">
+        <label>User Name:</label>
+        <InputText @bind-Value="credential.UserName" class="form-control" />
+        <ValidationMessage For="@(() => credential.UserName)" />
+    </div>
+    
+    <div class="form-group">
+        <label>Password:</label>
+<InputText @bind-Value="credential.Password" type="password" class="form-control" />
+        <ValidationMessage For="@(() => credential.Password)" />
+    </div>
+    
+    <button type="submit" class="btn btn-primary">Login</button>
 </EditForm>
+
 
 @* Codeblock für login *@
 
@@ -36,6 +57,19 @@
 
     private async Task DoLogin()
     {
+        var response = await Http.PostAsJsonAsync("https://localhost.com/api/login", credential);
+
+        if (response.IsSuccessStatusCode)
+        {
+            // Erfolg: Token lesen
+            var token = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Login erfolgreich, Token: {token}");
+        }
+        else
+        {
+            // Fehlerbehandlung
+            Console.WriteLine("Login fehlgeschlagen");
+        }
         errorMessage = "";
         if (credential.UserName == "admin" && credential.Password == "geheim") 
         {
@@ -54,13 +88,25 @@
             errorMessage = "Ungültiger Benutzername oder Passwort!";
         }
     }
-    public class Credential
+    // public class Credential
+    // {
+    //     [Required]
+    //     [Display(Name = "User Name")]
+    //     public string UserName { get; set; }
+    //     [Required]
+    //     [DataType(DataType.Password)]
+    //     public string Password { get; set; }
+    // }
+
+
+      public class Credential
     {
-        [Required]
+        [Required(ErrorMessage = "Benutzername ist erforderlich.")]
         [Display(Name = "User Name")]
-        public string UserName { get; set; }
-        [Required]
+        public string UserName { get; set; } = string.Empty;
+        
+        [Required(ErrorMessage = "Passwort ist erforderlich.")]
         [DataType(DataType.Password)]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
     }
 }
