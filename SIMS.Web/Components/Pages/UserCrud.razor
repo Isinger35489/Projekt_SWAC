@@ -114,17 +114,17 @@ else
         if (!UserState.IsLoggedIn)
         {
             showRedirectMessage = true;
-            Navigation.NavigateTo("/account/login", true);
+            // Navigation.NavigateTo("/account/login", true);
         }
     }
 
-    // protected override void OnAfterRender(bool firstRender)
-    // {
-    //     if (firstRender && !UserState.IsLoggedIn)
-    //     {
-    //         Navigation.NavigateTo("/account/login", true);
-    //     }
-    // }
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender && !UserState.IsLoggedIn)
+        {
+            Navigation.NavigateTo("/account/login", true);
+        }
+    }
 
     private List<User> users;
     private User newUser = new();
