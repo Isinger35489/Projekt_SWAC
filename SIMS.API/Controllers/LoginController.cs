@@ -33,7 +33,7 @@ namespace SIMS.API.Controllers
                 return Unauthorized("Invalid username or password");
 
             // If valid, you could return a JWT token or success message
-            return Ok(new { Message = "Login successful" });
+            return Ok(user);
         }
     }
 }
