@@ -7,6 +7,29 @@
 @inject LoginState UserState
 @inject HttpClient Http
 
+@* @if (isValidatingSession)
+{
+    <div class="alert alert-info">
+        <p>Session wird validiert...</p>
+    </div>
+}
+else if (!UserState.IsLoggedIn)
+{
+    <div class="alert alert-warning">
+        <p>Sie sind nicht angemeldet. Weiterleitung zum Login...</p>
+    </div>
+}
+else
+{
+    @* Header mit User-Info und Logout-Button *@
+@*     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px; background: #f5f5f5; border-radius: 6px;">
+        <div>
+            <h3 style="margin: 0;">Incidents</h3>
+            <small>Eingeloggt als: <strong>@UserState.Username</strong> (@UserState.Role)</small>
+        </div>
+        <button @onclick="Logout" class="btn btn-danger">Logout</button>
+    </div>
+ *@ 
 
 @* 
 @if (!UserState.IsLoggedIn)
@@ -192,7 +215,8 @@ else
                 PasswordHash = newUser.PasswordHash,
                 Email = newUser.Email,
                 Role = newUser.Role,
-                Enabled = true
+                Enabled = true,
+                CreatedAt = DateTime.Now
             };
             users.Add(localUser);
             newUser = new();
@@ -203,6 +227,10 @@ else
 
         try
         {
+
+            newUser.CreatedAt = DateTime.Now;
+            newUser.Enabled = true;
+
             var response = await Http.PostAsJsonAsync("api/Users", newUser);
             if (response.IsSuccessStatusCode)
             {

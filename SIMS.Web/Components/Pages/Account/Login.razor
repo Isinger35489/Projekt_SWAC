@@ -3,6 +3,7 @@
 @inject LoginState UserState
 @inject NavigationManager Navigation
 @rendermode InteractiveServer 
+@* @rendermode @(new InteractiveServerRenderMode(prerender: false)) *@
 @using SIMS.Core;
 @using SIMS.Core.Classes;
 @using System.ComponentModel.DataAnnotations
@@ -48,7 +49,17 @@
         <ValidationMessage For="@(() => credential.Password)" />
     </div>
     
-    <button type="submit" class="btn btn-primary">Login</button>
+  @*   <button type="submit" class="btn btn-primary">Login</button> *@
+  <button type="submit" class="btn btn-primary" disabled="@isLoggingIn">
+        @if (isLoggingIn)
+        {
+            <span>Login läuft...</span>
+        }
+        else
+        {
+            <span>Login</span>
+        }
+    </button>
 </EditForm>
 
 
@@ -58,13 +69,16 @@
     private Credential credential = new();
     private string errorMessage;
     private string successMessage;
-
+     private bool isLoggingIn = false;
+    //  public bool IsLoggedIn => !string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(SessionId);
+    // // public bool IsLoggedIn => !string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(SessionId);
 
 
     private async Task DoLogin()
     {
         errorMessage = "";
         successMessage = "";
+         isLoggingIn = true;
  
 
         // //zum testen ist man dauernd als admin eingeloggt
@@ -73,6 +87,8 @@
         //     Navigation.NavigateTo("/home");
 
         //senden an Logindatn an API
+        try
+        {
         var response = await Http.PostAsJsonAsync("/api/login", credential); //generalisiert URL damits weniger progbleme macht
 
         if (response.IsSuccessStatusCode)
@@ -85,19 +101,25 @@
                 // holt sich API Userinfos aus der API und schreibt sie in die Webapp klasse UserState
                 UserState.Id = result.User.Id;
                 UserState.Username = result.User.Username;
+                UserState.SessionId = result.SessionId;
+        
 
                 // Parse role from string to RoleType enum
                 UserState.Role = result.User.Role.ToLower() == "admin"
                     ? RoleType.Admin
                     : RoleType.User;
 
-                successMessage = "Login erfolgreich! Weiterleitung...";
-                Console.WriteLine($"Login erfolgreich für User: {result.User.Username}, Session: {result.SessionId}");
+                       Console.WriteLine($"Login erfolgreich für User: {result.User.Username}, Session: {result.SessionId}");
 
-                StateHasChanged();
+                    //speichert die session im browser
+                    await UserState.SaveToStorage();
+                    Console.WriteLine("Session im Browser gespeichert");
+                    successMessage = "Login erfolgreich! Weiterleitung...";
+                
+                    StateHasChanged();
                 await Task.Delay(500);  // Short delay to show success message
 
-                Navigation.NavigateTo("/home");
+                Navigation.NavigateTo("/home", forceLoad: true);
             }
             else
             {
@@ -122,35 +144,18 @@
             Console.WriteLine($"API Fehler: {response.StatusCode}");
         }
     }
-        // errorMessage = "";
-        // if (credential.UserName == "admin" && credential.Password == "geheim") 
-        // {
-        //     UserState.Username = "admin";
-        //     UserState.Role = RoleType.Admin;
-        //     Navigation.NavigateTo("/home");
-        //    }
-        // else if (credential.UserName == "user" && credential.Password == "secret")
-        // {
-        //     UserState.Username = "user";
-        //     UserState.Role = RoleType.User;
-        //     Navigation.NavigateTo("/home");
-        // }
-        // else
-        // {
-        //     errorMessage = "Ungültiger Benutzername oder Passwort!";
-        // }
-    
-    // public class Credential
-    // {
-    //     [Required]
-    //     [Display(Name = "User Name")]
-    //     public string UserName { get; set; }
-    //     [Required]
-    //     [DataType(DataType.Password)]
-    //     public string Password { get; set; }
-    // }
+      catch (Exception ex)
+        {
+            errorMessage = $"Fehler: {ex.Message}";
+            Console.WriteLine($"Exception beim Login: {ex}");
+        }
+        finally
+        {
+            isLoggingIn = false;
+        }
+    }
 
-
+  
       public class Credential
     {
         [Required(ErrorMessage = "Benutzername ist erforderlich.")]

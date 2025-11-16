@@ -31,7 +31,7 @@
 </EditForm> *@
 
 @*2 variante*@
-<EditForm Model="credential" OnValidSubmit="DoLogin">
+@* <EditForm Model="credential" OnValidSubmit="DoLogin">
     <DataAnnotationsValidator />
     
     <div class="form-group">
@@ -48,54 +48,57 @@
     
     <button type="submit" class="btn btn-primary">Login</button>
 </EditForm>
-
+ *@
 
 @* Codeblock für login *@
 
-@code {
+@* @code {
     private Credential credential = new();
     private string errorMessage;
 
     private async Task DoLogin()
-    {
+    { 
 
-
+*@
+@*
         // //zum testen ist man dauernd als admin eingeloggt
         //     UserState.Username = "admin";
         //     UserState.Role = RoleType.Admin;
         //     Navigation.NavigateTo("/home");
 
-        var response = await Http.PostAsJsonAsync("https://localhost:7168/api/login", credential);
+        // var response = await Http.PostAsJsonAsync("https://localhost:7168/api/login", credential);
 
-        if (response.IsSuccessStatusCode)
-        {
-            // Erfolg: Token lesen
-            var token = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Login erfolgreich, Token: {token}");
-        }
-        else
-        {
-            // Fehlerbehandlung
+        // if (response.IsSuccessStatusCode)
+        // {
+        //     // Erfolg: Token lesen
+        //     var token = await response.Content.ReadAsStringAsync();
+        //     Console.WriteLine($"Login erfolgreich, Token: {token}");
+        // }
+        // else
+        // {
+             
+            
+           // Fehlerbehandlung 
             Console.WriteLine("Login fehlgeschlagen");
         }
         errorMessage = "";
-        if (credential.UserName == "admin" && credential.Password == "geheim") 
-        {
-            UserState.Username = "admin";
-            UserState.Role = RoleType.Admin;
-            Navigation.NavigateTo("/home");
-           }
-        else if (credential.UserName == "user" && credential.Password == "secret")
-        {
-            UserState.Username = "user";
-            UserState.Role = RoleType.User;
-            Navigation.NavigateTo("/home");
-        }
-        else
-        {
-            errorMessage = "Ungültiger Benutzername oder Passwort!";
-        }
-    }
+     if (credential.UserName == "admin" && credential.Password == "geheim")  
+     {
+    //         UserState.Username = "admin";
+    //         UserState.Role = RoleType.Admin;
+    //         Navigation.NavigateTo("/home");
+    //        }
+    //     else if (credential.UserName == "user" && credential.Password == "secret")
+    //     {
+    //         UserState.Username = "user";
+    //         UserState.Role = RoleType.User;
+    //         Navigation.NavigateTo("/home");
+    //     }
+    //     else
+    //     {
+    //         errorMessage = "Ungültiger Benutzername oder Passwort!";
+    //     }
+    // }
     // public class Credential
     // {
     //     [Required]
@@ -107,14 +110,15 @@
     // }
 
 
-      public class Credential
-    {
-        [Required(ErrorMessage = "Benutzername ist erforderlich.")]
-        [Display(Name = "User Name")]
-        public string UserName { get; set; } = string.Empty;
+//       public class Credential
+//     {
+//         [Required(ErrorMessage = "Benutzername ist erforderlich.")]
+//         [Display(Name = "User Name")]
+//         public string UserName { get; set; } = string.Empty;
         
-        [Required(ErrorMessage = "Passwort ist erforderlich.")]
-        [DataType(DataType.Password)]
-        public string Password { get; set; } = string.Empty;
-    }
-}
+//         [Required(ErrorMessage = "Passwort ist erforderlich.")]
+//         [DataType(DataType.Password)]
+//         public string Password { get; set; } = string.Empty;
+//     }
+// }
+*@

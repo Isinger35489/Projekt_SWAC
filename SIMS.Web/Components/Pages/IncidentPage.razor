@@ -1,33 +1,44 @@
-﻿@using SIMS.API;
-@using SIMS.Core;
+﻿@using SIMS.API
+@using SIMS.Core
 @using SIMS.Core.Classes
 @page "/incidents"
 @inject HttpClient Http
-@rendermode InteractiveServer 
 @inject IJSRuntime JSRuntime
 @inject NavigationManager Navigation
 @inject LoginState UserState
-@* 
-@if (!UserState.IsLoggedIn)
-{
-    Navigation.NavigateTo("/account/login", true);
-    <div>Umleitung zum Login...</div>
-    return;
-} *@
+@* @rendermode @(new InteractiveServerRenderMode(prerender: false)) *@
+@rendermode InteractiveServer
 
-@if (showRedirectMessage)
+@if (isValidatingSession)
 {
     <div class="alert alert-info">
+        <p>Session wird validiert...</p>
+    </div>
+}
+else if (!UserState.IsLoggedIn)
+{
+    <div class="alert alert-warning">
         <p>Sie sind nicht angemeldet. Weiterleitung zum Login...</p>
     </div>
 }
 else
 {
-    @* wenn eingeloggt, geschützte Seite anzeigen *@
-    
+    @* Header mit User-Info und Logout-Button *@
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px; background: #f5f5f5; border-radius: 6px;">
+        <div>
+            <h3 style="margin: 0;">Incidents</h3>
+            <small>Eingeloggt als: <strong>@UserState.Username</strong> (@UserState.Role)</small>
+        </div>
+        <button @onclick="Logout" class="btn btn-danger">Logout</button>
+    </div>
 
 
-<h3>Incidents</h3>
+@* wenn eingeloggt, geschützte Seite anzeigen *@ 
+ @* Nur admin kann eingabeformular sehen *@
+       @*  @if (UserState.Role == RoleType.Admin)
+        {
+    <hr />
+<h4>Incidents</h4> *@ 
 
 @* Benachrichtigung für User, das sie nur daten laden aber nicht ändern können. *@
 @if (UserState.Role == RoleType.User)
@@ -53,6 +64,8 @@ else
                 <th>Status</th>
                 <th>Beschreibung</th>
                 <th>Alert-Level</th>
+                <th>Severity</th>
+                <th>System</th>
                 <th>Aktionen</th>
             </tr>
         </thead>
@@ -67,6 +80,8 @@ else
                         <td><input @bind="editIncident.Status" /></td>
                         <td><input @bind="editIncident.Description" /></td>
                         <td><input type="number" @bind="editIncident.EscalationLevel" /></td>
+                        <td> <input @bind="editIncident.Severity" placeholder="Severity" /></td>
+                        <td> <input @bind="editIncident.System" placeholder="System" />  </td>
                         <td>
                           @*   nur admin kann speichern und abbrechen *@
                              @if (UserState.Role == RoleType.Admin)
@@ -85,6 +100,9 @@ else
                         <td>@inc.Status</td>
                         <td>@inc.Description</td>
                         <td>@inc.EscalationLevel</td>
+                        <td>@inc.Severity</td>
+                        <td>@inc.System</td>
+
                         <td>
                               @*   nur admin kann ändern, löschen, und weiterleiten *@
                             @if (UserState.Role == RoleType.Admin)
@@ -145,12 +163,18 @@ else
             <div>
                 <InputText @bind-Value="newIncident.System" placeholder="System *" />
                 <ValidationMessage For="@(() => newIncident.System)" />     </div>
-            <div>
+           @*  <div>
                 <InputDate @bind-Value="newIncident.CreatedAt" />
                 <ValidationMessage For="@(() => newIncident.CreatedAt)" />     </div>
             <div>
-                <InputDate @bind-Value="newIncident.ClosedAt" placeholder="Closed At (optional)" />     </div>
-            <button type="submit">Anlegen</button>
+                <InputDate @bind-Value="newIncident.ClosedAt" placeholder="Closed At (optional)" />     </div> *@
+             @*    <div>  <label>Erstellt am:</label>
+    <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="newIncident.CreatedAt" />
+    <ValidationMessage For="@(() => newIncident.CreatedAt)" />     </div> *@
+<div>     <label>Geschlossen am (optional):</label>
+    <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="newIncident.ClosedAt" />     </div>
+                
+    <button type="submit">Anlegen</button>
         </EditForm>
     }
 
@@ -165,27 +189,29 @@ else
         <div style="color: green; margin-top: 10px;">@successMessage</div>
     }
 }
-}
-@* codeblock für Laden von den incidents aus sql oder dummy*@
-@code {
-    private bool showRedirectMessage = false;
 
-    protected override void OnInitialized()
+ @* codeblock für Laden von den incidents aus sql oder dummy *@
+@code 
     {
-        if (!UserState.IsLoggedIn)
-        {
-            showRedirectMessage = true;
-        }
-    }
+        // private bool showRedirectMessage = false;
+     private bool isValidatingSession = true;
 
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender && !UserState.IsLoggedIn)
-        {
-            Navigation.NavigateTo("/account/login", true);
-        }
+    // protected override void OnInitialized()
+    // {
+    //     if (!UserState.IsLoggedIn)
+    //     {
+    //         showRedirectMessage = true;
+    //     }
+    // }
 
-    }
+    // protected override void OnAfterRender(bool firstRender)
+    // {
+    //     if (firstRender && !UserState.IsLoggedIn)
+    //     {
+    //         Navigation.NavigateTo("/account/login", true);
+    //     }
+
+    // }
 
     private List<Incident> incidents;
     private Incident newIncident = new Incident();
@@ -193,18 +219,102 @@ else
     private string errorMessage = "";
     private string successMessage = "";
 
-    protected override async Task OnInitializedAsync()
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     try
+    //     {
+    //         await LoadIncidents();
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         errorMessage = $"Fehler beim Laden: {ex.Message}";
+    //         await LoadMockData();
+    //     }
+    // }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Console.WriteLine("OnAfterRenderAsync - firstRender");
+
+            //Session aus browser laden        
+            var loaded = await UserState.LoadFromStorage();
+            Console.WriteLine($"LoadFromStorage result: {loaded}");
+            Console.WriteLine($"SessionId: {UserState.SessionId}");
+            Console.WriteLine($"Username: {UserState.Username}");
+
+            if (!loaded || string.IsNullOrEmpty(UserState.SessionId))
+            {
+                Console.WriteLine("Keine gespeicherte Session - Weiterleitung zum Login");
+                // showRedirectMessage = true;
+                Navigation.NavigateTo("/account/login", forceLoad: true);
+                return;
+            }
+
+            // Session beim Backend validieren
+            try
+            {
+                Console.WriteLine($"Validiere Session: {UserState.SessionId}");
+                var response = await Http.GetAsync($"/api/login/validate?sessionId={UserState.SessionId}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<SessionValidationResponse>();
+
+                    if (result != null && result.Success)
+                    {
+                        Console.WriteLine($"Session gültig für User: {UserState.Username}");
+                        isValidatingSession = false;
+
+                        // Incidents laden
+                        await LoadIncidents();
+                        StateHasChanged();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Session ungültig - Logout");
+                        await UserState.ClearStorage();
+                        Navigation.NavigateTo("/account/login", forceLoad: true);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Session-Validierung fehlgeschlagen: {response.StatusCode}");
+                    await UserState.ClearStorage();
+                    Navigation.NavigateTo("/account/login", forceLoad: true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Fehler bei Session-Validierung: {ex.Message}");
+                errorMessage = $"Fehler beim Laden: {ex.Message}";
+                await LoadMockData();
+                isValidatingSession = false;
+                StateHasChanged();
+            }
+        }
+    }
+    @* Logout-Methode *@
+    private async Task Logout()
     {
         try
         {
-            await LoadIncidents();
+            // Optional: Backend über Logout informieren
+            // await Http.PostAsync($"/api/login/logout?sessionId={UserState.SessionId}", null);
+            
+            await UserState.ClearStorage();
+            Console.WriteLine("Logout erfolgreich");
+            Navigation.NavigateTo("/account/login", forceLoad: true);
         }
         catch (Exception ex)
         {
-            errorMessage = $"Fehler beim Laden: {ex.Message}";
-            await LoadMockData();
+            Console.WriteLine($"Fehler beim Logout: {ex.Message}");
+            await UserState.ClearStorage();
+            Navigation.NavigateTo("/account/login", forceLoad: true);
         }
     }
+
+
 
     @* Laden von Incidents aus api*@
     private async Task LoadIncidents()
@@ -273,13 +383,18 @@ else
                 successMessage = "Incident erfolgreich hinzugefügt";
             }
             else
-            {
-                errorMessage = $"Fehler: {res.StatusCode}";
+            { 
+                //detallierte Fehlerausgabe in der Konsole
+                var errorContent = await res.Content.ReadAsStringAsync();
+            errorMessage = $"Fehler: {res.StatusCode} - {errorContent}";
+            Console.WriteLine($"API Error: {errorContent}");
+                // errorMessage = $"Fehler: {res.StatusCode}";
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"Fehler beim Hinzufügen: {ex.Message}";
+               Console.WriteLine($"Exception: {ex}");
         }
     }
     @* löschen von daten*@
@@ -322,7 +437,9 @@ else
             Id = inc.Id,
             Status = inc.Status,
             Description = inc.Description,
-            EscalationLevel = inc.EscalationLevel
+            EscalationLevel = inc.EscalationLevel,
+            Severity = inc.Severity,      
+            System = inc.System 
         };
     }
 @* Abbrechen von editieren*@
@@ -347,7 +464,9 @@ else
                     Id = editIncident.Id,
                     Status = editIncident.Status,
                     Description = editIncident.Description,
-                    EscalationLevel = editIncident.EscalationLevel
+                    EscalationLevel = editIncident.EscalationLevel,
+                    Severity = editIncident.Severity,      
+                    System = editIncident.System 
                 };
             }
             editIncident = null;
@@ -367,7 +486,11 @@ else
             }
             else
             {
-                errorMessage = $"Fehler beim Aktualisieren: {res.StatusCode}";
+               // Detaillierte Fehlerausgabe
+            var errorContent = await res.Content.ReadAsStringAsync();
+            errorMessage = $"Fehler beim Aktualisieren: {res.StatusCode} - {errorContent}";
+            Console.WriteLine($"API Error: {errorContent}");
+       
             }
         }
         catch (Exception ex)
@@ -375,7 +498,7 @@ else
             errorMessage = $"Fehler beim Aktualisieren: {ex.Message}";
         }
     }
-    @* weiterleiten von incidents*@
+    //weiterleiten von incidents
     private async Task ForwardIncident(Incident inc)
     {
         errorMessage = "";
@@ -408,4 +531,20 @@ else
     }
 
     private bool IsUsingDummyData() => incidents?.FirstOrDefault()?.Description?.StartsWith("Dummy") ?? false;
+
+    // Response-Klasse für Session-Validierung
+    public class SessionValidationResponse
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public UserInfo User { get; set; }
+    }
+
+    public class UserInfo
+    {
+        public int Id { get; set; }
+        public string Username { get; set; }
+        public string Role { get; set; }
+    }
+}
 }

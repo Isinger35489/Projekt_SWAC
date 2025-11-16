@@ -23,7 +23,7 @@ namespace SIMS.Core.Classes
         public string Status { get; set; }
 
         //optional daher kein required verwendet
-        public string CVE { get; set; }
+        public string? CVE { get; set; }
 
         [Required]
         public int EscalationLevel { get; set; }
