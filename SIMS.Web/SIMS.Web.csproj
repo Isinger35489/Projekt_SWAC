@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="Components\Pages\Account\Login -alte variante.razor" />
     <Content Remove="Components\Pages\Account\Login.cshtml" />
   </ItemGroup>
 

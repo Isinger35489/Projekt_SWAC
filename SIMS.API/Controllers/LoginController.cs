@@ -90,6 +90,19 @@ namespace SIMS.API.Controllers
             });
         }
 
+        [HttpGet("validate")]
+        public IActionResult Validate([FromQuery] string sessionId)
+        {
+            if (string.IsNullOrEmpty(sessionId))
+                return BadRequest(new { success = false, message = "SessionId erforderlich" });
+
+            var sessionData = _redisSession.GetSession($"session:{sessionId}");
+            if (string.IsNullOrEmpty(sessionData))
+                return NotFound(new { success = false, message = "Ungültige oder abgelaufene Session" });
+
+            return Ok(new { success = true, message = "Session gültig", sessionData });
+        }
+
         //[HttpPost("logout")]
         //public IActionResult Logout([FromBody] LogoutRequest request)
         //{

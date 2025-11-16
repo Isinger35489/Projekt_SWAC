@@ -73,10 +73,10 @@ namespace SIMS.API
                 {
                     var context = svc.GetRequiredService<SimsDbContext>();
 
-                    //macht die Migrations, falls es Änderungen gibt.
-                    Console.WriteLine("Running database migrations...");
-                    context.Database.Migrate();
-                    Console.WriteLine("Migrations completed successfully!");
+                    ////macht die Migrations, falls es Änderungen gibt.
+                    //Console.WriteLine("Running database migrations...");
+                    //context.Database.Migrate();
+                    //Console.WriteLine("Migrations completed successfully!");
 
 
                     //User und Incident Daten händisch hinzufügen, kann auskommentiert werden, wenn nicht mehr benötigt:

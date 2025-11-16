@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SIMS.API;
 using SIMS.Core.Classes;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace SIMS.API.Controllers
 {
@@ -104,5 +105,22 @@ namespace SIMS.API.Controllers
         {
             return _context.Users.Any(e => e.Id == id);
         }
+        //um aktiveren und deaktiveren von usern
+        [HttpPatch("{id}/enabled")]
+        public async Task<IActionResult> SetUserEnabled(int id, [FromBody] JsonElement body)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+                return NotFound();
+
+            if (body.TryGetProperty("enabled", out var enabledProp))
+            {
+                user.Enabled = enabledProp.GetBoolean();
+                await _context.SaveChangesAsync();
+                return NoContent();
+            }
+            return BadRequest();
+        }
+
     }
 }

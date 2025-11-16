@@ -36,6 +36,20 @@ namespace SIMS.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Post(Incident incident)
         {
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);  // Zeigt Validierungsfehler
+        //    }
+
+        //    // Setze CVE auf null wenn leer
+        //    if (string.IsNullOrWhiteSpace(incident.CVE))
+        //    {
+        //        incident.CVE = null;
+        //    }
+
+            // Setze CreatedAt serverseitig
+            incident.CreatedAt = DateTime.Now;
+
             _context.Incidents.Add(incident);
             await _context.SaveChangesAsync();
 
@@ -49,6 +63,19 @@ namespace SIMS.API.Controllers
         public async Task<IActionResult> Put(int id, Incident incident)
         {
             if (id != incident.Id) return BadRequest();
+            
+           
+            if(!ModelState.IsValid)
+    {
+                return BadRequest(ModelState);
+            }
+
+            //// Wenn bei CVE nichts eingefügt ist es autmoatisch null
+            //if (string.IsNullOrWhiteSpace(incident.CVE))
+            //{
+            //    incident.CVE = null;
+            //}
+
 
             _context.Entry(incident).State = EntityState.Modified;
             await _context.SaveChangesAsync();
