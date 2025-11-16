@@ -73,52 +73,47 @@ namespace SIMS.API
                 {
                     var context = svc.GetRequiredService<SimsDbContext>();
 
+                    //macht die Migrations, falls es Änderungen gibt.
                     Console.WriteLine("Running database migrations...");
                     context.Database.Migrate();
                     Console.WriteLine("Migrations completed successfully!");
 
 
+                    //User und Incident Daten händisch hinzufügen, kann auskommentiert werden, wenn nicht mehr benötigt:
+                    context.Incidents.Add(new Incident
+                    {
+                        ReporterId = 8,
+                        HandlerId = 12,
+                        Description = "Server down",
+                        Severity = "High",
+                        Status = "In Work",
+                        CVE = "CVE129",
+                        EscalationLevel = 2,
+                        System = "WebServer01",
+                        CreatedAt = DateTime.Now
+                    });
 
-                    //context.Incidents.Add(new Incident
-                    //{
-                    //    ReporterId = 8,
-                    //    HandlerId = 12,
-                    //    Description = "Server down",
-                    //    Severity = "High",
-                    //    Status = "In Work",
-                    //    CVE = "CVE129",
-                    //    EscalationLevel = 2,
-                    //    System = "WebServer01",
-                    //    CreatedAt = DateTime.Now
-
-
-                    //});
-                   
-                        context.Users.Add(new User
+                    context.Users.Add(new User
                     {
                         Username = "adminia",
                         PasswordHash = "geheim",
                         Email = "sdlkfjas@klasdjf.com",
-                        Role = "Administrator",
+                        Role = "admin",
                         Enabled = true,
                         CreatedAt = DateTime.Now
-
-
                     });
 
-                        context.Users.Add(new User
-                        {
-                            Username = "peter",
-                            PasswordHash = "lustig",
-                            Email = "sdlkfjas@klasdjf.com",
-                            Role = "user",
-                            Enabled = true,
-                            CreatedAt = DateTime.Now
+                    context.Users.Add(new User
+                    {
+                        Username = "peter",
+                        PasswordHash = "lustig",
+                        Email = "sdlkfjas@klasdjf.com",
+                        Role = "user",
+                        Enabled = true,
+                        CreatedAt = DateTime.Now
+                    });
 
-
-                        });
-
-                        context.SaveChanges();
+                    context.SaveChanges();
 
                 }
                 catch (Exception ex)

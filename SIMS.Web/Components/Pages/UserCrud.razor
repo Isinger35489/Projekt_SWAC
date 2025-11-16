@@ -1,5 +1,6 @@
-﻿@using SIMS.Core;
-@using SIMS.API;
+﻿@using SIMS.API;
+@using SIMS.Core;
+@using SIMS.Core.Classes
 @page "/users"
 @rendermode InteractiveServer 
 @inject NavigationManager Navigation
@@ -125,6 +126,8 @@ else
         {
             Navigation.NavigateTo("/account/login", true);
         }
+
+
     }
 
     private List<User> users;
