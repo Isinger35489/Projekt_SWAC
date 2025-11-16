@@ -4,6 +4,7 @@
 @inject NavigationManager Navigation
 @rendermode InteractiveServer 
 @using SIMS.Core;
+@using SIMS.Core.Classes;
 @using System.ComponentModel.DataAnnotations
 
 <h3>Login</h3>
@@ -30,14 +31,15 @@
     <button type="submit">Login</button>
 </EditForm> *@
 
-@*2 variante*@
+@*2 variante *@
+
 <EditForm Model="credential" OnValidSubmit="DoLogin">
     <DataAnnotationsValidator />
     
     <div class="form-group">
         <label>User Name:</label>
-        <InputText @bind-Value="credential.UserName" class="form-control" />
-        <ValidationMessage For="@(() => credential.UserName)" />
+        <InputText @bind-Value="credential.Username" class="form-control" />
+        <ValidationMessage For="@(() => credential.Username)" />
     </div>
     
     <div class="form-group">
@@ -55,47 +57,89 @@
 @code {
     private Credential credential = new();
     private string errorMessage;
+    private string successMessage;
+
+
 
     private async Task DoLogin()
     {
-
+        errorMessage = "";
+        successMessage = "";
+ 
 
         // //zum testen ist man dauernd als admin eingeloggt
         //     UserState.Username = "admin";
         //     UserState.Role = RoleType.Admin;
         //     Navigation.NavigateTo("/home");
 
-        var response = await Http.PostAsJsonAsync("https://localhost:7168/api/login", credential);
+        //senden an Logindatn an API
+        var response = await Http.PostAsJsonAsync("/api/login", credential); //generalisiert URL damits weniger progbleme macht
 
         if (response.IsSuccessStatusCode)
         {
             // Erfolg: Token lesen
-            var token = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Login erfolgreich, Token: {token}");
+            var result = await response.Content.ReadFromJsonAsync<LoginResponse>(); //holt sich die Antwort von der API
+
+            if (result != null && result.Success)
+            {
+                // holt sich API Userinfos aus der API und schreibt sie in die Webapp klasse UserState
+                UserState.Id = result.User.Id;
+                UserState.Username = result.User.Username;
+
+                // Parse role from string to RoleType enum
+                UserState.Role = result.User.Role.ToLower() == "admin"
+                    ? RoleType.Admin
+                    : RoleType.User;
+
+                successMessage = "Login erfolgreich! Weiterleitung...";
+                Console.WriteLine($"Login erfolgreich für User: {result.User.Username}, Session: {result.SessionId}");
+
+                StateHasChanged();
+                await Task.Delay(500);  // Short delay to show success message
+
+                Navigation.NavigateTo("/home");
+            }
+            else
+            {
+                errorMessage = result?.Message ?? "Login fehlgeschlagen";
+                Console.WriteLine($"Login fehlgeschlagen: {errorMessage}");
+            }
+            //Console.WriteLine($"Login erfolgreich, Token: {token}");
         }
         else
         {
-            // Fehlerbehandlung
-            Console.WriteLine("Login fehlgeschlagen");
-        }
-        errorMessage = "";
-        if (credential.UserName == "admin" && credential.Password == "geheim") 
-        {
-            UserState.Username = "admin";
-            UserState.Role = RoleType.Admin;
-            Navigation.NavigateTo("/home");
-           }
-        else if (credential.UserName == "user" && credential.Password == "secret")
-        {
-            UserState.Username = "user";
-            UserState.Role = RoleType.User;
-            Navigation.NavigateTo("/home");
-        }
-        else
-        {
-            errorMessage = "Ungültiger Benutzername oder Passwort!";
+            // Handle error responses
+            try
+            {
+                var error = await response.Content.ReadFromJsonAsync<LoginResponse>();
+                errorMessage = error?.Message ?? "Ungültiger Benutzername oder Passwort";
+            }
+            catch
+            {
+                errorMessage = "Ungültiger Benutzername oder Passwort";
+            }
+
+            Console.WriteLine($"API Fehler: {response.StatusCode}");
         }
     }
+        // errorMessage = "";
+        // if (credential.UserName == "admin" && credential.Password == "geheim") 
+        // {
+        //     UserState.Username = "admin";
+        //     UserState.Role = RoleType.Admin;
+        //     Navigation.NavigateTo("/home");
+        //    }
+        // else if (credential.UserName == "user" && credential.Password == "secret")
+        // {
+        //     UserState.Username = "user";
+        //     UserState.Role = RoleType.User;
+        //     Navigation.NavigateTo("/home");
+        // }
+        // else
+        // {
+        //     errorMessage = "Ungültiger Benutzername oder Passwort!";
+        // }
+    
     // public class Credential
     // {
     //     [Required]
@@ -111,7 +155,7 @@
     {
         [Required(ErrorMessage = "Benutzername ist erforderlich.")]
         [Display(Name = "User Name")]
-        public string UserName { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
         
         [Required(ErrorMessage = "Passwort ist erforderlich.")]
         [DataType(DataType.Password)]

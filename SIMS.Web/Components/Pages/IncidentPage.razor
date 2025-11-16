@@ -1,5 +1,6 @@
-﻿@using SIMS.Core;
-@using SIMS.API;
+﻿@using SIMS.API;
+@using SIMS.Core;
+@using SIMS.Core.Classes
 @page "/incidents"
 @inject HttpClient Http
 @rendermode InteractiveServer 
@@ -183,6 +184,7 @@ else
         {
             Navigation.NavigateTo("/account/login", true);
         }
+
     }
 
     private List<Incident> incidents;
