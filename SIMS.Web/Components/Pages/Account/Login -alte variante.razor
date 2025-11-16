@@ -1,0 +1,120 @@
+﻿@page "/account/login"
+@inject HttpClient Http
+@inject LoginState UserState
+@inject NavigationManager Navigation
+@rendermode InteractiveServer 
+@using SIMS.Core;
+@using System.ComponentModel.DataAnnotations
+
+<h3>Login</h3>
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+@* Formular für login *@
+@*1ste variante*@
+@* <EditForm Model="credential" OnValidSubmit="DoLogin" FormName="login-form">
+    <DataAnnotationsValidator /> *@
+   @*  <ValidationSummary />
+    <div>
+        <label>User Name:</label>
+        <InputText @bind-Value="credential.UserName" />
+        <ValidationMessage For="@(() => credential.UserName)" />
+    </div>
+    <div>
+        <label>Password:</label>
+        <InputText @bind-Value="credential.Password" type="password" />
+        <ValidationMessage For="@(() => credential.Password)" />
+    </div>
+    <button type="submit">Login</button>
+</EditForm> *@
+
+@*2 variante*@
+<EditForm Model="credential" OnValidSubmit="DoLogin">
+    <DataAnnotationsValidator />
+    
+    <div class="form-group">
+        <label>User Name:</label>
+        <InputText @bind-Value="credential.UserName" class="form-control" />
+        <ValidationMessage For="@(() => credential.UserName)" />
+    </div>
+    
+    <div class="form-group">
+        <label>Password:</label>
+<InputText @bind-Value="credential.Password" type="password" class="form-control" />
+        <ValidationMessage For="@(() => credential.Password)" />
+    </div>
+    
+    <button type="submit" class="btn btn-primary">Login</button>
+</EditForm>
+
+
+@* Codeblock für login *@
+
+@code {
+    private Credential credential = new();
+    private string errorMessage;
+
+    private async Task DoLogin()
+    {
+
+
+        // //zum testen ist man dauernd als admin eingeloggt
+        //     UserState.Username = "admin";
+        //     UserState.Role = RoleType.Admin;
+        //     Navigation.NavigateTo("/home");
+
+        var response = await Http.PostAsJsonAsync("https://localhost:7168/api/login", credential);
+
+        if (response.IsSuccessStatusCode)
+        {
+            // Erfolg: Token lesen
+            var token = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Login erfolgreich, Token: {token}");
+        }
+        else
+        {
+            // Fehlerbehandlung
+            Console.WriteLine("Login fehlgeschlagen");
+        }
+        errorMessage = "";
+        if (credential.UserName == "admin" && credential.Password == "geheim") 
+        {
+            UserState.Username = "admin";
+            UserState.Role = RoleType.Admin;
+            Navigation.NavigateTo("/home");
+           }
+        else if (credential.UserName == "user" && credential.Password == "secret")
+        {
+            UserState.Username = "user";
+            UserState.Role = RoleType.User;
+            Navigation.NavigateTo("/home");
+        }
+        else
+        {
+            errorMessage = "Ungültiger Benutzername oder Passwort!";
+        }
+    }
+    // public class Credential
+    // {
+    //     [Required]
+    //     [Display(Name = "User Name")]
+    //     public string UserName { get; set; }
+    //     [Required]
+    //     [DataType(DataType.Password)]
+    //     public string Password { get; set; }
+    // }
+
+
+      public class Credential
+    {
+        [Required(ErrorMessage = "Benutzername ist erforderlich.")]
+        [Display(Name = "User Name")]
+        public string UserName { get; set; } = string.Empty;
+        
+        [Required(ErrorMessage = "Passwort ist erforderlich.")]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = string.Empty;
+    }
+}
