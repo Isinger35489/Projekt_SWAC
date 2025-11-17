@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 //using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 //using SIMS.Core;
 using SIMS.Core.Classes;
+using SIMS.Core.Security;
 using StackExchange.Redis;
 
 namespace SIMS.API
@@ -57,13 +58,18 @@ namespace SIMS.API
             builder.Services.AddSingleton<IConnectionMultiplexer>(
                 ConnectionMultiplexer.Connect($"{redisHost}:{redisPort},abortConnect=false")
             );
-
-            //RegisSessionService einbinden
+                        //RegisSessionService einbinden
             builder.Services.AddSingleton<RedisSessionService>();
 
             //nach hier dürfen keine Builds mehr vorkommen
             var app = builder.Build();
 
+            // testen vom PasswordHasher. Kommt gleich oben in der API Konsole
+            //var hasher = new PasswordHasher();
+            //var hashed = hasher.HashPassword("testpassword");
+            //bool isValid = hasher.VerifyPassword("testpassword", hashed);
+            //Console.WriteLine($"Hash: {hashed}");
+            //Console.WriteLine($"Valid: {isValid}"); // sollte "True" ausgeben
 
             //hinzufügen von Testdaten in die SQL Datenbank:
             using (var scope = app.Services.CreateScope())
@@ -80,38 +86,38 @@ namespace SIMS.API
 
 
                     //User und Incident Daten händisch hinzufügen, kann auskommentiert werden, wenn nicht mehr benötigt:
-                    context.Incidents.Add(new Incident
-                    {
-                        ReporterId = 8,
-                        HandlerId = 12,
-                        Description = "Server down",
-                        Severity = "High",
-                        Status = "In Work",
-                        CVE = "CVE129",
-                        EscalationLevel = 2,
-                        System = "WebServer01",
-                        CreatedAt = DateTime.Now
-                    });
+                    //context.Incidents.Add(new Incident
+                    //{
+                    //    ReporterId = 8,
+                    //    HandlerId = 12,
+                    //    Description = "Server down",
+                    //    Severity = "High",
+                    //    Status = "In Work",
+                    //    CVE = "CVE129",
+                    //    EscalationLevel = 2,
+                    //    System = "WebServer01",
+                    //    CreatedAt = DateTime.Now
+                    //});
 
-                    context.Users.Add(new User
-                    {
-                        Username = "adminia",
-                        PasswordHash = "geheim",
-                        Email = "sdlkfjas@klasdjf.com",
-                        Role = "admin",
-                        Enabled = true,
-                        CreatedAt = DateTime.Now
-                    });
+                    //context.Users.Add(new User
+                    //{
+                    //    Username = "adminia",
+                    //    PasswordHash = "geheim",
+                    //    Email = "sdlkfjas@klasdjf.com",
+                    //    Role = "admin",
+                    //    Enabled = true,
+                    //    CreatedAt = DateTime.Now
+                    //});
 
-                    context.Users.Add(new User
-                    {
-                        Username = "peter",
-                        PasswordHash = "lustig",
-                        Email = "sdlkfjas@klasdjf.com",
-                        Role = "user",
-                        Enabled = true,
-                        CreatedAt = DateTime.Now
-                    });
+                    //context.Users.Add(new User
+                    //{
+                    //    Username = "peter",
+                    //    PasswordHash = "lustig",
+                    //    Email = "sdlkfjas@klasdjf.com",
+                    //    Role = "user",
+                    //    Enabled = true,
+                    //    CreatedAt = DateTime.Now
+                    //});
 
                     context.SaveChanges();
 
