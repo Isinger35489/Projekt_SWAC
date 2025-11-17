@@ -77,15 +77,15 @@ namespace SIMS.API.Controllers
             // Return success response
             return Ok(new
             {
-                success = true,
-                message = "Login successful",
+                Success = true,
+                Message = "Login successful",
                 sessionId = sessionId,
-                user = new
+                User = new
                 {
-                    id = user.Id,
-                    username = user.Username,
-                    email = user.Email,
-                    role = user.Role
+                    Id = user.Id,
+                    Username = user.Username,
+                    Email = user.Email,
+                    Role = user.Role
                 }
             });
         }
