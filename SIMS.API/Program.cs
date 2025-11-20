@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using SIMS.Core.Classes;
 using SIMS.Core.Security;
 using StackExchange.Redis;
+using SIMS.API.Services;
+
 
 namespace SIMS.API
 {
@@ -37,13 +39,14 @@ namespace SIMS.API
             });
 
             // appsettings-api.json laden (vor AddDbContext)
-            //Datenbank service hinzufügen
+            //Datenbank service hinzufï¿½gen
             builder.Services.AddDbContext<SimsDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // Add services to the container.
             builder.Services.AddControllers();
-            
+            builder.Services.AddHttpClient<TelegramAlerter>();
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             
@@ -54,14 +57,14 @@ namespace SIMS.API
             var redisHost = Environment.GetEnvironmentVariable("REDIS_HOST") ?? "localhost";
             var redisPort = Environment.GetEnvironmentVariable("REDIS_PORT") ?? "6379";
 
-            //variabler port für redis statt fixer port
+            //variabler port fï¿½r redis statt fixer port
             builder.Services.AddSingleton<IConnectionMultiplexer>(
                 ConnectionMultiplexer.Connect($"{redisHost}:{redisPort},abortConnect=false")
             );
                         //RegisSessionService einbinden
             builder.Services.AddSingleton<RedisSessionService>();
 
-            //nach hier dürfen keine Builds mehr vorkommen
+            //nach hier dï¿½rfen keine Builds mehr vorkommen
             var app = builder.Build();
 
             // testen vom PasswordHasher. Kommt gleich oben in der API Konsole
@@ -71,7 +74,7 @@ namespace SIMS.API
             //Console.WriteLine($"Hash: {hashed}");
             //Console.WriteLine($"Valid: {isValid}"); // sollte "True" ausgeben
 
-            //hinzufügen von Testdaten in die SQL Datenbank:
+            //hinzufï¿½gen von Testdaten in die SQL Datenbank:
             using (var scope = app.Services.CreateScope())
             {
                 var svc = scope.ServiceProvider;
@@ -79,13 +82,13 @@ namespace SIMS.API
                 {
                     var context = svc.GetRequiredService<SimsDbContext>();
 
-                    ////macht die Migrations, falls es Änderungen gibt.
+                    ////macht die Migrations, falls es ï¿½nderungen gibt.
                     //Console.WriteLine("Running database migrations...");
                     //context.Database.Migrate();
                     //Console.WriteLine("Migrations completed successfully!");
 
 
-                    //User und Incident Daten händisch hinzufügen, kann auskommentiert werden, wenn nicht mehr benötigt:
+                    //User und Incident Daten hï¿½ndisch hinzufï¿½gen, kann auskommentiert werden, wenn nicht mehr benï¿½tigt:
                     //context.Incidents.Add(new Incident
                     //{
                     //    ReporterId = 8,

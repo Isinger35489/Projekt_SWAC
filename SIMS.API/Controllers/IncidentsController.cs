@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SIMS.Core.Classes;
+using SIMS.API.Services;
 
 namespace SIMS.API.Controllers
 {
@@ -10,17 +14,22 @@ namespace SIMS.API.Controllers
     {
         private readonly SimsDbContext _context;
         private readonly RedisSessionService _redisService;
-        public IncidentsController(SimsDbContext context, RedisSessionService redisService)
+        private readonly TelegramAlerter _telegramAlerter;
+
+        public IncidentsController(
+            SimsDbContext context,
+            RedisSessionService redisService,
+            TelegramAlerter telegramAlerter)
         {
             _context = context;
             _redisService = redisService;
+            _telegramAlerter = telegramAlerter;
         }
-       [HttpGet]
+
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<Incident>>> GetAll()
         {
-            // In Redis loggen
             _redisService.SetSession("last_access", DateTime.Now.ToString());
-            
             return await _context.Incidents.ToListAsync();
         }
 
@@ -36,18 +45,6 @@ namespace SIMS.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Post(Incident incident)
         {
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);  // Zeigt Validierungsfehler
-        //    }
-
-        //    // Setze CVE auf null wenn leer
-        //    if (string.IsNullOrWhiteSpace(incident.CVE))
-        //    {
-        //        incident.CVE = null;
-        //    }
-
-            // Setze CreatedAt serverseitig
             incident.CreatedAt = DateTime.Now;
 
             _context.Incidents.Add(incident);
@@ -56,6 +53,9 @@ namespace SIMS.API.Controllers
             _redisService.SetSession($"incident:{incident.Id}:created", DateTime.Now.ToString());
             _redisService.SetSession("last_incident_created", incident.Id.ToString());
 
+            // Telegram-Alert nach erfolgreichem Speichern
+            await _telegramAlerter.SendIncidentCreatedAsync(incident);
+
             return CreatedAtAction(nameof(Get), new { id = incident.Id }, incident);
         }
 
@@ -63,25 +63,16 @@ namespace SIMS.API.Controllers
         public async Task<IActionResult> Put(int id, Incident incident)
         {
             if (id != incident.Id) return BadRequest();
-            
-           
-            if(!ModelState.IsValid)
-    {
+
+            if (!ModelState.IsValid)
+            {
                 return BadRequest(ModelState);
             }
-
-            //// Wenn bei CVE nichts eingefügt ist es autmoatisch null
-            //if (string.IsNullOrWhiteSpace(incident.CVE))
-            //{
-            //    incident.CVE = null;
-            //}
-
 
             _context.Entry(incident).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             _redisService.SetSession($"incident:{id}:last_updated", DateTime.Now.ToString());
-
 
             return NoContent();
         }
@@ -97,12 +88,7 @@ namespace SIMS.API.Controllers
 
             _redisService.SetSession($"incident:{id}:deleted", DateTime.Now.ToString());
 
-
             return NoContent();
         }
     }
-    
-
 }
-
-
