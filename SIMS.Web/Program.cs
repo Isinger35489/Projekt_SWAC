@@ -10,40 +10,55 @@ namespace SIMS.Web
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+        
 
-            // Add services to the container.
-            builder.Services.AddRazorComponents()
-                .AddInteractiveServerComponents();
-            // OPTIONAL: DbContext nur falls Web direkt auf DB zugreift
-            // Wenn nur über API, dann diese Zeile entfernen
-            builder.Services.AddHttpClient();
-            builder.Services.AddScoped<LoginState>();
+            var apiBase = builder.Configuration["ApiSettings:BaseUrl"]
+                ?? Environment.GetEnvironmentVariable("API_URI_BASE")
+                ?? "https://localhost:7168";
+
+            //API Key aus appsetting.json holen
+            var apiKey = builder.Configuration["ApiSettings:ApiKey"]
+                ?? throw new InvalidOperationException("API Key not configured in appsettings.json");
+
+            //Verbindung an SQL DB, DB Service starten
             builder.Services.AddDbContext<SimsDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnetion")));
 
-            var apiBase = Environment.GetEnvironmentVariable("API_URI_BASE") ?? "https://localhost:7168";
-            builder.Services.AddScoped(sp => new HttpClient
+            //Razor Service hinzufügen:
+            builder.Services.AddRazorComponents()
+                .AddInteractiveServerComponents();
+
+                       
+            builder.Services.AddHttpClient("SecureApiClient", client =>
             {
-                BaseAddress = new Uri(apiBase),
-                Timeout = TimeSpan.FromSeconds(30)
+                client.BaseAddress = new Uri(apiBase);
+                client.Timeout = TimeSpan.FromSeconds(30);
+
+                // API key zu allen Requests hinzufügen:
+                client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
+
+                // zusätzliche Security Header: danke KI
+                client.DefaultRequestHeaders.Add("User-Agent", "SIMS.Web/1.0");
+            })
+           .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+           {
+              
+               //selbst signiertes Zertifikat übernehmen. Nicht ideal aber besser gehts nicht
+               ServerCertificateCustomValidationCallback =
+                   HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+           });
+
+            // Register named HttpClient for use in components
+            builder.Services.AddScoped(sp =>
+            {
+                var clientFactory = sp.GetRequiredService<IHttpClientFactory>();
+                return clientFactory.CreateClient("SecureApiClient");
             });
 
             builder.Services.AddScoped<LoginState>();
 
 
-            //
-            //builder.Services.AddScoped(sp => new HttpClient
-            //{
-            //    BaseAddress = new Uri("https://localhost:5001") 
-            //});
-
-            // für port 5000 beides gleichzeitig geht nicht
-            // builder.Services.AddScoped(sp => new HttpClient
-            //{
-            //   BaseAddress = new Uri("https://localhost:5000")
-            //});
-
-
             var app = builder.Build();
+
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -63,6 +78,7 @@ namespace SIMS.Web
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 
+            
             app.Run();
         }
     }

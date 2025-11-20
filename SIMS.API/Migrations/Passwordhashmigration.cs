@@ -4,16 +4,16 @@ using SIMS.Core.Security;
 
 namespace SIMS.API.Migrations
 {
-    /// <summary>
+
     /// Database migration helper to convert existing plain text passwords to BCrypt hashes
     /// Run this ONCE after implementing BCrypt to update existing user passwords
-    /// </summary>
+
     public class PasswordHashMigration
     {
-        /// <summary>
+ 
         /// Convert all plain text passwords in database to BCrypt hashes
         /// WARNING: This is a one-time operation and irreversible!
-        /// </summary>
+
         public static async Task MigratePasswordsAsync(SimsDbContext context)
         {
             try
@@ -68,10 +68,9 @@ namespace SIMS.API.Migrations
             }
         }
 
-        /// <summary>
         /// Create default users with hashed passwords
         /// Use this for fresh installations or after database reset
-        /// </summary>
+
         public static async Task SeedUsersAsync(SimsDbContext context)
         {
             try
@@ -124,9 +123,8 @@ namespace SIMS.API.Migrations
             }
         }
 
-        /// <summary>
         /// Verify that all passwords in database are properly hashed
-        /// </summary>
+
         public static async Task<bool> VerifyPasswordHashesAsync(SimsDbContext context)
         {
             try
@@ -177,40 +175,3 @@ namespace SIMS.API.Migrations
     }
 }
 
-// ===================================================================
-// USAGE IN Program.cs
-// ===================================================================
-
-/*
-
-Add this to your Program.cs in SIMS.API after database migration:
-
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var logger = services.GetRequiredService<ILogger<Program>>();
-    var context = services.GetRequiredService<SimsDbContext>();
-
-    try
-    {
-        // Apply EF migrations first
-        logger.LogInformation("Applying database migrations...");
-        context.Database.Migrate();
-
-        // Option 1: Seed new users (fresh database)
-        await PasswordHashMigration.SeedUsersAsync(context, logger);
-
-        // Option 2: Migrate existing plain text passwords (existing database)
-        // await PasswordHashMigration.MigratePasswordsAsync(context, logger);
-
-        // Verify all passwords are properly hashed
-        await PasswordHashMigration.VerifyPasswordHashesAsync(context, logger);
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Database initialization failed");
-        throw;
-    }
-}
-
-*/

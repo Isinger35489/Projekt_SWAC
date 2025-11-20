@@ -2,22 +2,20 @@
 
 namespace SIMS.Core.Security
 {
-    /// <summary>
+
     /// Password hashing utility using BCrypt algorithm
     /// Provides secure password hashing and verification for the SIMS project
-    /// </summary>
+
     public class PasswordHasher
     {
-        /// <summary>
+      
         /// Hash a plain text password using BCrypt
-        /// </summary>
-        /// <param name="password">Plain text password to hash</param>
-        /// <returns>BCrypt hashed password with salt</returns>
+ 
         public string HashPassword(string password)
         {
             if (string.IsNullOrWhiteSpace(password))
             {
-                throw new ArgumentException("Password cannot be null or empty", nameof(password));
+                throw new ArgumentException("Passwort darf nicht NULL oder leer sein", nameof(password));
             }
 
             // BCrypt.HashPassword automatically generates and includes a salt
@@ -25,12 +23,8 @@ namespace SIMS.Core.Security
             return BCrypt.Net.BCrypt.HashPassword(password, workFactor: 12);
         }
 
-        /// <summary>
-        /// Verify a plain text password against a BCrypt hash
-        /// </summary>
-        /// <param name="password">Plain text password to verify</param>
-        /// <param name="hashedPassword">BCrypt hashed password from database</param>
-        /// <returns>True if password matches, false otherwise</returns>
+ 
+        /// Checkt das Passwort mit dem hinterlegten Hashwert
         public bool VerifyPassword(string password, string hashedPassword)
         {
             if (string.IsNullOrWhiteSpace(password))
@@ -50,17 +44,13 @@ namespace SIMS.Core.Security
             }
             catch (Exception)
             {
-                // If hash format is invalid, return false instead of throwing
+                //wenn hash format nicht passt, "false" zurücksenden
                 return false;
             }
         }
 
-        /// <summary>
-        /// Check if a password needs to be rehashed (e.g., if work factor has changed)
-        /// </summary>
-        /// <param name="hashedPassword">Current hashed password</param>
-        /// <param name="targetWorkFactor">Desired work factor (default: 12)</param>
-        /// <returns>True if password should be rehashed</returns>
+
+        /// Nochmal überprüfen ob das PW rehashed werden muss, um sicher zu gehen
         public bool NeedsRehash(string hashedPassword, int targetWorkFactor = 12)
         {
             try
