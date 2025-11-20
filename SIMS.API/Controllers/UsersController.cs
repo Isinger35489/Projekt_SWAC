@@ -77,7 +77,6 @@ namespace SIMS.API.Controllers
         }
 
         // POST: api/Users
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
         {
@@ -91,7 +90,7 @@ namespace SIMS.API.Controllers
                 return BadRequest(new { message = "Password is required" });
             }
 
-            //// ✅ Optional: Check for duplicate username
+            //// Optional: prüft ob der Username bereits existiert
             //if (await _context.Users.AnyAsync(u => u.Username == user.Username))
             //{
             //    return Conflict(new { message = "Username already exists" });
@@ -103,7 +102,7 @@ namespace SIMS.API.Controllers
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
 
-        // DELETE: api/Users/5
+        // DELETE: api/Users/
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
