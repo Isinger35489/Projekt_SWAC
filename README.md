@@ -279,3 +279,12 @@ Permission is hereby granted, free of charge, to any person obtaining a copy...
 ## 📞 Support (in Außnahmefällen)
 
 Bei Fragen oder Problemen: sims-support@ustp-students.at
+
+
+## Anleitung zur Passworthash Migration von bestehenden SQL Datenbanken:
+
+- in der SIMS.API Applikation im Program.cs Zeilen 67-110 wieder reinkommentieren
+- die Zeilen 67-110 in Program.cs sorgen dafür, dass alle bestehenden User Passwörter gehashed werden
+- Anschließend die Applikation einmal starten, damit die Migration durchgeführt wird
+- die Zeilen 67-110 sollen nur für die einmalige Passworthash Migration aktiviert werden
+- danach wieder auskommentieren, damit die Passwörter nicht bei jedem Start erneut gehashed werden

@@ -58,7 +58,12 @@ namespace SIMS.API
 
             var app = builder.Build();
 
-            // DB-Migration + optional Seed
+
+            //==================================================================
+            // DB-Migration und Passwort-Hash-Migration werden unten ausgeführt,
+            // auskommentieren wenn nicht benötigt:
+            //==================================================================
+
             using (var scope = app.Services.CreateScope())
             {
                 var svc = scope.ServiceProvider;
@@ -66,20 +71,46 @@ namespace SIMS.API
                 {
                     var context = svc.GetRequiredService<SimsDbContext>();
 
-                    // 💾 Migrations ausführen (legt u.a. Tabelle "Incidents" an)
-                    Console.WriteLine("Running database migrations...");
+                    // Migrations ausführen (legt u.a. Tabelle "Incidents" an)
+                    //Console.WriteLine("Running database migrations...");
                     context.Database.Migrate();
-                    Console.WriteLine("Migrations completed successfully!");
+                    //Console.WriteLine("Migrations completed successfully!");
 
-                    // Wenn du nichts seedest, brauchst du SaveChanges hier eigentlich nicht mehr.
-                    // context.SaveChanges();
+
+                    // Checkt ob user gehashed sind und macht es dann:
+                    var firstUser = context.Users.FirstOrDefault();
+                    if (firstUser != null && !firstUser.PasswordHash.StartsWith("$2")) //"$2" ist der Anfang von BCrypt-Hashes
+                    {
+                        Console.WriteLine("Found plain text passwords! Converting to BCrypt...");
+
+                        // Migrieren vorhandener Passwörter:
+                        Migrations.PasswordHashMigration.MigratePasswordsAsync(context).Wait();
+
+                        Console.WriteLine("Password migration complete!");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Passwords already hashed");
+                    }
+
+                    //checkt nochmal nach, ob die Passwörter jetzt alle gehashed sind:
+                    var allValid = Migrations.PasswordHashMigration
+                        .VerifyPasswordHashesAsync(context).Result;
+
+                    if (allValid)
+                    {
+                        Console.WriteLine("All passwords are properly hashed!");
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine("Fehler beim Initialisieren/Seed der DB: " + ex);
+                    Console.Error.WriteLine("Fehler beim Initialisieren der DB: " + ex);
                     throw;
                 }
             }
+
+
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

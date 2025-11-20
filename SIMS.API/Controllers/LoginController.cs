@@ -1,7 +1,9 @@
 ﻿//using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SIMS.Core.Classes;
+using SIMS.Core.Security;
 //using SIMS.Core;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -14,11 +16,12 @@ namespace SIMS.API.Controllers
     {
         private readonly SimsDbContext _context;
         private readonly RedisSessionService _redisSession;
-
+        private readonly PasswordHasher _passwordHasher;
         public LoginController(SimsDbContext context, RedisSessionService redisSession)
         {
             _context = context;
             _redisSession = redisSession;
+            _passwordHasher = new PasswordHasher();
         }
 
         [HttpPost]
@@ -57,17 +60,25 @@ namespace SIMS.API.Controllers
                 });
             }
 
-            // Verify password
-            // NOTE: For university project - in production use BCrypt!
-            // This compares plain text - NOT SECURE for real apps!
-            if (user.PasswordHash != request.Password)
-            {
-                return Unauthorized(new
+            // Password checken
+            bool isPasswordValid = _passwordHasher.VerifyPassword(request.Password, user.PasswordHash);
+
+            if (!isPasswordValid)
+            {                
+                return Unauthorized(new LoginResponse
                 {
-                    success = false,
-                    message = "Invalid username or password"
+                    Success = false,
+                    Message = "Invalid username or password"
                 });
             }
+            //if (user.PasswordHash != request.Password)
+            //{
+            //    return Unauthorized(new
+            //    {
+            //        success = false,
+            //        message = "Invalid username or password"
+            //    });
+            //}
 
             // Create session in Redis
             var sessionId = Guid.NewGuid().ToString();

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SIMS.API;
 using SIMS.Core.Classes;
+using SIMS.Core.Security;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,10 +17,11 @@ namespace SIMS.API.Controllers
     public class UsersController : ControllerBase
     {
         private readonly SimsDbContext _context;
-
+        private readonly PasswordHasher _passwordHasher;
         public UsersController(SimsDbContext context)
         {
             _context = context;
+            _passwordHasher = new PasswordHasher();
         }
 
         // GET: api/Users
@@ -79,6 +81,22 @@ namespace SIMS.API.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
         {
+            //Hashen bevor gespeichert wird:
+            if (!string.IsNullOrEmpty(user.PasswordHash))
+            {
+                user.PasswordHash = _passwordHasher.HashPassword(user.PasswordHash);
+            }
+            else
+            {
+                return BadRequest(new { message = "Password is required" });
+            }
+
+            //// ✅ Optional: Check for duplicate username
+            //if (await _context.Users.AnyAsync(u => u.Username == user.Username))
+            //{
+            //    return Conflict(new { message = "Username already exists" });
+            //}
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
