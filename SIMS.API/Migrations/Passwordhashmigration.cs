@@ -14,18 +14,17 @@ namespace SIMS.API.Migrations
         /// Convert all plain text passwords in database to BCrypt hashes
         /// WARNING: This is a one-time operation and irreversible!
         /// </summary>
-        public static async Task MigratePasswordsAsync(SimsDbContext context, ILogger logger)
+        public static async Task MigratePasswordsAsync(SimsDbContext context)
         {
             try
             {
-                logger.LogInformation("Starting password hash migration...");
 
                 var passwordHasher = new PasswordHasher();
                 var users = await context.Users.ToListAsync();
 
                 if (!users.Any())
                 {
-                    logger.LogInformation("No users found to migrate");
+
                     return;
                 }
 
@@ -37,7 +36,6 @@ namespace SIMS.API.Migrations
                     // Check if password is already hashed (BCrypt hashes start with $2a$, $2b$, or $2y$)
                     if (user.PasswordHash.StartsWith("$2"))
                     {
-                        logger.LogInformation("User {Username} already has hashed password, skipping", user.Username);
                         skippedCount++;
                         continue;
                     }
@@ -49,24 +47,23 @@ namespace SIMS.API.Migrations
                     user.PasswordHash = passwordHasher.HashPassword(plainTextPassword);
 
                     migratedCount++;
-                    logger.LogInformation("Migrated password for user: {Username}", user.Username);
+
                 }
 
                 // Save all changes
                 if (migratedCount > 0)
                 {
                     await context.SaveChangesAsync();
-                    logger.LogInformation("Password migration completed: {Migrated} migrated, {Skipped} skipped",
-                        migratedCount, skippedCount);
+
                 }
                 else
                 {
-                    logger.LogInformation("No passwords needed migration");
+                    Console.WriteLine("No passwords needed migration");
                 }
             }
-            catch (Exception ex)
+            
+            catch
             {
-                logger.LogError(ex, "Error during password migration");
                 throw;
             }
         }
@@ -75,17 +72,17 @@ namespace SIMS.API.Migrations
         /// Create default users with hashed passwords
         /// Use this for fresh installations or after database reset
         /// </summary>
-        public static async Task SeedUsersAsync(SimsDbContext context, ILogger logger)
+        public static async Task SeedUsersAsync(SimsDbContext context)
         {
             try
             {
                 if (await context.Users.AnyAsync())
                 {
-                    logger.LogInformation("Users already exist, skipping seeding");
+                    
                     return;
                 }
 
-                logger.LogInformation("Seeding default users with hashed passwords...");
+              
 
                 var passwordHasher = new PasswordHasher();
 
@@ -94,7 +91,7 @@ namespace SIMS.API.Migrations
                     new User
                     {
                         Username = "admin",
-                        PasswordHash = passwordHasher.HashPassword("admin123"),
+                        PasswordHash = passwordHasher.HashPassword("admin"),
                         Email = "admin@sims.local",
                         Role = "admin",
                         Enabled = true
@@ -102,7 +99,7 @@ namespace SIMS.API.Migrations
                     new User
                     {
                         Username = "user",
-                        PasswordHash = passwordHasher.HashPassword("user123"),
+                        PasswordHash = passwordHasher.HashPassword("user"),
                         Email = "user@sims.local",
                         Role = "user",
                         Enabled = true
@@ -110,7 +107,7 @@ namespace SIMS.API.Migrations
                     new User
                     {
                         Username = "security_officer",
-                        PasswordHash = passwordHasher.HashPassword("security123"),
+                        PasswordHash = passwordHasher.HashPassword("security"),
                         Email = "security@sims.local",
                         Role = "user",
                         Enabled = true
@@ -120,18 +117,9 @@ namespace SIMS.API.Migrations
                 context.Users.AddRange(defaultUsers);
                 await context.SaveChangesAsync();
 
-                logger.LogInformation("Successfully seeded {Count} users with hashed passwords", defaultUsers.Length);
-
-                // Log credentials for testing (ONLY in development!)
-                logger.LogWarning("=== DEFAULT USER CREDENTIALS (Development Only) ===");
-                logger.LogWarning("Admin: username=admin, password=admin123");
-                logger.LogWarning("User: username=user, password=user123");
-                logger.LogWarning("Security Officer: username=security_officer, password=security123");
-                logger.LogWarning("================================================");
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error during user seeding");
                 throw;
             }
         }
@@ -139,7 +127,7 @@ namespace SIMS.API.Migrations
         /// <summary>
         /// Verify that all passwords in database are properly hashed
         /// </summary>
-        public static async Task<bool> VerifyPasswordHashesAsync(SimsDbContext context, ILogger logger)
+        public static async Task<bool> VerifyPasswordHashesAsync(SimsDbContext context)
         {
             try
             {
@@ -147,7 +135,7 @@ namespace SIMS.API.Migrations
 
                 if (!users.Any())
                 {
-                    logger.LogWarning("No users found in database");
+                   
                     return true;
                 }
 
@@ -162,29 +150,27 @@ namespace SIMS.API.Migrations
 
                     if (!isValidHash)
                     {
-                        logger.LogError("User {Username} has invalid password hash format!", user.Username);
-                        allValid = false;
+                       allValid = false;
                     }
                     else
                     {
-                        logger.LogInformation("User {Username} has valid BCrypt hash", user.Username);
+                       Console.WriteLine("User {Username} has valid BCrypt hash", user.Username);
                     }
                 }
 
                 if (allValid)
                 {
-                    logger.LogInformation("All user passwords are properly hashed");
+                    Console.WriteLine("All user passwords are properly hashed");
                 }
                 else
                 {
-                    logger.LogError("Some users have invalid password hashes - migration may be needed");
+                    Console.WriteLine("Some users have invalid password hashes - migration may be needed");
                 }
 
                 return allValid;
             }
-            catch (Exception ex)
+            catch 
             {
-                logger.LogError(ex, "Error during password hash verification");
                 return false;
             }
         }
