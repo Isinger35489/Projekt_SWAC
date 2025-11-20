@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SIMS.Core.Classes;
 using SIMS.API.Services;
 
@@ -15,15 +16,18 @@ namespace SIMS.API.Controllers
         private readonly SimsDbContext _context;
         private readonly RedisSessionService _redisService;
         private readonly TelegramAlerter _telegramAlerter;
+        private readonly ILogger<IncidentsController> _logger;
 
         public IncidentsController(
             SimsDbContext context,
             RedisSessionService redisService,
-            TelegramAlerter telegramAlerter)
+            TelegramAlerter telegramAlerter,
+            ILogger<IncidentsController> logger)
         {
             _context = context;
             _redisService = redisService;
             _telegramAlerter = telegramAlerter;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -42,9 +46,34 @@ namespace SIMS.API.Controllers
             return incident ?? (ActionResult<Incident>)NotFound();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Post(Incident incident)
+        // Test-Endpunkt ohne DB, nur Telegram
+        [HttpPost("test-telegram-only")]
+        public async Task<IActionResult> TestTelegramOnly()
         {
+            var dummy = new Incident
+            {
+                Id = 9999,
+                System = "TEST-SYSTEM",
+                Severity = "Low",
+                Status = "Open",
+                Description = "Dies ist ein Test-Alert",
+                CreatedAt = DateTime.Now
+            };
+
+            await _telegramAlerter.SendIncidentCreatedAsync(dummy);
+
+            return Ok("Telegram-Alert wurde gesendet (oder Fehler in Console/Error ansehen).");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] Incident incident)
+        {
+            if (incident == null)
+                return BadRequest("Incident darf nicht null sein.");
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             incident.CreatedAt = DateTime.Now;
 
             _context.Incidents.Add(incident);
@@ -53,21 +82,32 @@ namespace SIMS.API.Controllers
             _redisService.SetSession($"incident:{incident.Id}:created", DateTime.Now.ToString());
             _redisService.SetSession("last_incident_created", incident.Id.ToString());
 
-            // Telegram-Alert nach erfolgreichem Speichern
-            await _telegramAlerter.SendIncidentCreatedAsync(incident);
+            // Telegram-Alert soll die API nicht kaputt machen, wenn etwas schiefgeht
+            try
+            {
+                await _telegramAlerter.SendIncidentCreatedAsync(incident);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Fehler beim Senden des Telegram-Alerts für Incident {IncidentId}",
+                    incident.Id);
+            }
 
             return CreatedAtAction(nameof(Get), new { id = incident.Id }, incident);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, Incident incident)
+        public async Task<IActionResult> Put(int id, [FromBody] Incident incident)
         {
-            if (id != incident.Id) return BadRequest();
+            if (incident == null)
+                return BadRequest("Incident darf nicht null sein.");
+
+            if (id != incident.Id)
+                return BadRequest("ID in URL und Body stimmen nicht überein.");
 
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
 
             _context.Entry(incident).State = EntityState.Modified;
             await _context.SaveChangesAsync();
