@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Components\NewFolder1\**" />
+    <Content Remove="Components\NewFolder1\**" />
+    <EmbeddedResource Remove="Components\NewFolder1\**" />
+    <None Remove="Components\NewFolder1\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Components\Pages\Account\Login.cshtml.cs" />
   </ItemGroup>
 
@@ -31,6 +38,10 @@
   <ItemGroup>
     <ProjectReference Include="..\SIMS.API\SIMS.API.csproj" />
     <ProjectReference Include="..\SIMS.Core\SIMS.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Components\NewFolder\" />
   </ItemGroup>
 
 </Project>

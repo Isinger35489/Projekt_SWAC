@@ -1,0 +1,31 @@
+﻿@inject NavigationManager Navigation
+@inject LoginState UserState
+
+@if (UserState.IsLoggedIn)
+{
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
+       <div style="padding: 10px; color: #666; font-size: 0.85em;">
+            <small>Eingeloggt als: <strong>@UserState.Username</strong> (@UserState.Role)</small>
+        </div>
+        <button @onclick="Logout" class="nav-link btn btn-link" style="width: 100%; text-align: left;">
+                    <span class="bi bi-box-arrow-right" aria-hidden="true"></span> Logout
+        </button>
+    </div>
+}
+
+@code {
+    private async Task Logout()
+    {
+        try
+        {
+            await UserState.ClearStorage();
+            Navigation.NavigateTo("/account/login", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Logout: {ex.Message}");
+            await UserState.ClearStorage();
+            Navigation.NavigateTo("/account/login", forceLoad: true);
+        }
+    }
+}
