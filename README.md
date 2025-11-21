@@ -389,6 +389,7 @@ classDiagram
 
 
 ### <h3 style="color: #ffffff; font-weight: bold;"> Mögliche Security-Erweiterungen </h3>
+### Mögliche Security-Erweiterungen
 
 - **Rollen & Rechte schärfen**  
   Admin-Endpunkte klar trennen und nur für Admin-Rollen freigeben.
@@ -412,93 +413,88 @@ classDiagram
 ####   <h1 style="color: #ffffff; font-weight: bold;">🔒 SAST</h1> 
 
 ### <h3 style="color: #ffffff; font-weight: bold;"> Semgrep-Ergebnisse </h3> 
+### Statische Analyse (SAST)
 
-**Semgrep Prüfung**
+- Der Code kann mit **Semgrep** analysiert werden, z. B.:
 
+  ```bash
+  semgrep --config=auto .
+
+Semgrep-Ergebnisse
+Semgrep Prüfung
 semgrep --config=auto .
--   **Code Smells vermeiden:**  Clean Code, Rollenprüfungen, Sicherstellung parametrisierter SQL-Queries (Dapper/EF), Authentifizierung mit Token (JWT)
-    
--   **Findings dokumentieren:**  (z. B. 0 Critical, 2 Medium, 4 Low)
-    
--   **XSS:**  Nicht relevant (keine Web-Oberfläche)
-    
--   **Passwortschutz:**  Alle Passwörter gehasht
-
+Code Smells vermeiden: Clean Code, Rollenprüfungen, Sicherstellung parametrisierter SQL-Queries (Dapper/EF), Authentifizierung mit Token (JWT)
+Findings dokumentieren: (z. B. 0 Critical, 2 Medium, 4 Low)
+XSS: Nicht relevant (keine Web-Oberfläche)
+Passwortschutz: Alle Passwörter gehasht
 semgrep --config=auto .
-
-**Findings**: 
-
+Findings:
 ──── ○○○ ────┐
 │ Semgrep CLI │
 └─────────────┘
 
-                                                                                                                     
 Scanning 86 files (only git-tracked) with:
-                                      
+
 ✔ Semgrep OSS
   ✔ Basic security coverage for first-party code vulnerabilities.
-                                              
+
 ✘ Semgrep Code (SAST)
-  ✘ Find and fix vulnerabilities in the code you write with advanced scanning and expert security     
-rules.                                                                                                               
-                                                     
+  ✘ Find and fix vulnerabilities in the code you write with advanced scanning and expert security rules.
+
 ✘ Semgrep Supply Chain (SCA)
   ✘ Find and fix the reachable vulnerabilities in your OSS dependencies.
-                                                                            
+
 💎 Get started with all Semgrep products via `semgrep login`.
-✨ Learn more at https://sg.run/cloud.                        
-                                                                            
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00                                                                                                                     
-                   
-                   
+✨ Learn more at https://sg.run/cloud.
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+
 ┌─────────────────┐
 │ 4 Code Findings │
 └─────────────────┘
-                                                            
+
     SIMS.API/Controllers/SessionController.cs
     ❯❱ csharp.dotnet.security.mvc-missing-antiforgery.mvc-missing-antiforgery
           Set is a state-changing MVC method that does not validate the antiforgery token or do strict     
           content-type checking. State-changing controller methods should either enforce antiforgery tokens
           or do strict content-type checking to prevent simple HTTP request types from bypassing CORS      
-          preflight controls.                                                                              
-          Details: https://sg.run/Y0Jy                                                                     
-                                                                                                           
+          preflight controls.
+          Details: https://sg.run/Y0Jy     
+
            16┆ [HttpPost]
            17┆ public IActionResult Set([FromQuery] string key, [FromQuery] string value)
            18┆ {
            19┆     _service.SetSession(key, value);
            20┆     return Ok();
            21┆ }
-                                      
+
     SIMS.API/Dockerfile
    ❯❯❱ dockerfile.security.missing-user-entrypoint.missing-user-entrypoint
           By not specifying a USER, a program in the container may run as 'root'. This is a security  
           hazard. If an attacker can control a process running as root, they may have control over the
-          container. Ensure that the last USER in a Dockerfile is a USER other than 'root'.           
-          Details: https://sg.run/k281                                                                
-                                                                                                      
+          container. Ensure that the last USER in a Dockerfile is a USER other than 'root'.
+          Details: https://sg.run/k281
+
            ▶▶┆ Autofix ▶ USER non-root ENTRYPOINT ["dotnet", "SIMS.API.dll"]
            29┆ ENTRYPOINT ["dotnet", "SIMS.API.dll"]
-                                            
+
     SIMS.API/appsettings.json
    ❯❯❱ generic.secrets.security.detected-telegram-bot-api-key.detected-telegram-bot-api-key
           Telegram Bot API Key detected
           Details: https://sg.run/nd4b 
-                                       
+
            26┆ "BotToken": "8213041452:AAGWnzP24LhV57jRdoaP0IA-JOcpuDCrtik",
-                                      
+
     SIMS.Web/Dockerfile
    ❯❯❱ dockerfile.security.missing-user-entrypoint.missing-user-entrypoint
           By not specifying a USER, a program in the container may run as 'root'. This is a security  
           hazard. If an attacker can control a process running as root, they may have control over the
-          container. Ensure that the last USER in a Dockerfile is a USER other than 'root'.           
-          Details: https://sg.run/k281                                                                
-                                                                                                      
+          container. Ensure that the last USER in a Dockerfile is a USER other than 'root'.
+          Details: https://sg.run/k281
+
            ▶▶┆ Autofix ▶ USER non-root ENTRYPOINT ["dotnet", "SIMS.Web.dll"]
            30┆ ENTRYPOINT ["dotnet", "SIMS.Web.dll"]
 
-                
-                
 ┌──────────────┐
 │ Scan Summary │
 └──────────────┘
@@ -514,13 +510,11 @@ Ran 133 rules on 86 files: 4 findings.
 ⚡ Supercharge Semgrep OSS when you create a free account at https://sg.run/rules.
 
 ⏫ A new version of Semgrep is available. See https://semgrep.dev/docs/upgrading
-
 Fazit zu den Findings:
-
 Es wurden 4 Findings gefunden, keine davon kritisch, aber alle sicherheitsrelevant.
 SessionController: POST /api/session ändert Serverzustand ohne CSRF-/Antiforgery-Schutz oder strikte Content-Type-Prüfung → in Produktion absichern oder entfernen.
 Dockerfiles (API & Web): Container laufen aktuell als root → künftig eigenen, nicht-privilegierten User verwenden.
-Telegram-Bot-Token liegt in appsettings.json → Token rotieren und in Zukunft nur über Environment-Variablen / Secret-Store, nicht im Git-Repo. 
+Telegram-Bot-Token liegt in appsettings.json → Token rotieren und in Zukunft nur über Environment-Variablen / Secret-Store, nicht im Git-Repo.
 
 
 ## <h1 style="color: #ffffff; font-weight: bold;"> 📊 Versionshistorie</h1> 
