@@ -51,19 +51,19 @@ docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=YourStrong@Passw0rd" -p 1433:1433 
 # Redis Container fürs Projekt:
 docker run -d --name redis-1 -p 6379:6379 redis:latest
 
-# auf DB schrieben testen:
-# -in CMD das hinzufügen nachdme der Container läuft:
+# auf DB schreiben testen:
+# - in CMD das hinzufügen nachdem der Container läuft:
 curl -X POST "http://localhost:5013/api/session?key=testuser&value=john_doe"
 
-# schauen obs funktionier hat:
-# -in CMD auf container verbinden:
+# schauen obs funktioniert hat:
+# - in CMD auf Container verbinden:
 docker exec -it redis-1 redis-cli
 get testuser
 "john_doe"
 
-
-- testen von Sessions in Redis schreiben:
+# testen von Sessions in Redis schreiben:
 curl -X POST http://localhost:5013/api/incidents -H "Content-Type: application/json" -d "{\"ReporterId\":1,\"HandlerId\":1,\"Description\":\"Test Incident\",\"Severity\":\"High\",\"Status\":\"Open\",\"CVE\":\"CVE-123\",\"EscalationLevel\":1,\"System\":\"WebServer\",\"CreatedAt\":\"2025-11-13T10:00:00\"}"
+
 
 
 
@@ -71,9 +71,8 @@ curl -X POST http://localhost:5013/api/incidents -H "Content-Type: application/j
 ### 3.1 SQL Container starten (falls nicht schon geschehen)
 docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=YourStrong@Passw0rd" -p 1433:1433 --name db-1 --hostname db-1 -d mcr.microsoft.com/mssql/server:2022-latest
 
-
-
 docker exec -it sims-sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "YourStrong@Passw0rd" -i /docker-entrypoint-initdb.d/create_database.sql
+
 
 ### 4. Anwendung starten
 
