@@ -42,8 +42,6 @@ SIMS (Security Incident Management System) ist ein System zum Protokollieren und
 - **📨 Notifizierungen**: Übermittlung mithilfe von Chatbot (BOT-Tom)
 - **🐳 Dockerized**: Alle Hauptkomponenten laufen in eigenen Docker Containern in einem separaten Network (momentan nur SQL-DB & Redis)
 
-![Sims Divider](https://cdn.wallpapersafari.com/37/76/wG15dM.jpg)
-
 ## <h1 style="color: #ffffff; font-weight: bold;">🚀 Systemvoraussetzungen</h1>
 
 - **Betriebssystem**: Windows 11, Linux (Ubuntu 20.04+), macOS 11+
@@ -55,50 +53,59 @@ SIMS (Security Incident Management System) ist ein System zum Protokollieren und
 
 ##  <h1 style="color: #ffffff; font-weight: bold;">📦 Installation und Start</h1>
 
-<details> <summary>Klicken für Installationsschritte</summary>
-<h3 style="color: #ffffff; font-weight: bold;"> 1. Repository klonen </h3>
+<details> <summary>🛠️ Klicken für Installationsschritte</summary>
+<h3 style="color: #ffffff; font-weight: bold;"> 1️⃣ Repository klonen </h3>
 
+```
 git clone GIT-REPO-URL
 cd SIMS
+```
 
-### <h3 style="color: #ffffff; font-weight: bold;"> 2. Docker-Container starten </h3>
+### <h3 style="color: #ffffff; font-weight: bold;"> 🐳 2️⃣ Docker-Container starten </h3>
 
+```
 cd Docker
 docker-compose up -d
+```
 
 ### <h3 style="color: #ffffff; font-weight: bold;"> 💡 2.1 Docker einzeln starten (Alternative)
 
-```bash
-# SQL-Container für das Projekt
+
+### <h4 style="color: #ffffff; font-weight: bold;">  SQL-Container für das Projekt</h4>
+```
 docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=YourStrong@Passw0rd" \
   -p 1433:1433 --name db-1 --hostname db-1 \
   -d mcr.microsoft.com/mssql/server:2022-latest
-
-# Redis-Container fürs Projekt
+```
+### <h4 style="color: #ffffff; font-weight: bold;"> Redis-Container fürs Projekt</h4>
+```
 docker run -d --name redis-1 -p 6379:6379 redis:latest
-
-# Test: Session per API in Redis schreiben
+```
+### <h4 style="color: #ffffff; font-weight: bold;"> Test: Session per API in Redis schreiben</h4>
+```
 curl -X POST "http://localhost:5013/api/session?key=testuser&value=john_doe"
-
-# Test: Session in Redis überprüfen
+```
+### <h4 style="color: #ffffff; font-weight: bold;"> Test: Session in Redis überprüfen</h4>
+```
 docker exec -it redis-1 redis-cli
 get testuser
 ```
-</details>
 
 
-## <h2 style="color: #ffffff; font-weight: bold;"> 3. Datenbank initialisieren</h2> 
-### <h3 style="color: #ffffff; font-weight: bold;"> 3.1 SQL Container starten (falls nicht schon geschehen) </h3> 
+
+## <h2 style="color: #ffffff; font-weight: bold;">🗄️ 3️⃣  Datenbank initialisieren</h2> 
+### <h4 style="color: #ffffff; font-weight: bold;"> 3.1 SQL Container starten (falls nicht schon geschehen) </h4> 
+
+```
 docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=YourStrong@Passw0rd" -p 1433:1433 --name db-1 --hostname db-1 -d mcr.microsoft.com/mssql/server:2022-latest
-
 docker exec -it sims-sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "YourStrong@Passw0rd" -i /docker-entrypoint-initdb.d/create_database.sql
+```
 
-
-### <h3 style="color: #ffffff; font-weight: bold;">  4. Anwendung starten </h2>
-
+### <h4 style="color: #ffffff; font-weight: bold;"> 🚀 4️⃣ Anwendung starten </h4>
+```
 docker exec -it sims-app dotnet SIMS.App.dll
-
-### <h4 style="color: #ffffff; font-weight: bold;"> Anleitung zur Passworthash Migration von bestehenden SQL Datenbanken:</h4> 
+```
+### <h4 style="color: #ffffff; font-weight: bold;">🔑  Anleitung zur Passworthash Migration von bestehenden SQL Datenbanken:</h4> 
 
 - in der SIMS.API Applikation im Program.cs Zeilen 67-110 wieder reinkommentieren
 - die Zeilen 67-110 in Program.cs sorgen dafür, dass alle bestehenden User Passwörter gehashed werden
@@ -106,6 +113,8 @@ docker exec -it sims-app dotnet SIMS.App.dll
 - die Zeilen 67-110 sollen nur für die einmalige Passworthash Migration aktiviert werden
 - danach wieder auskommentieren, damit die Passwörter nicht bei jedem Start erneut gehashed werden
   </p>
+
+</details>
 
 ##   <h1 style="color: #ffffff; font-weight: bold;">🏗️ Architektur</h1>
 
@@ -368,20 +377,20 @@ classDiagram
 
 ### <h3 style="color: #ffffff; font-weight: bold;"> Semgrep Prüfung </h3> 
 
-  ```bash
-  semgrep --config=auto .
-
-Semgrep-Ergebnisse
-Semgrep Prüfung
+``` 
+bash
 semgrep --config=auto .
-Code Smells vermeiden: Clean Code, Rollenprüfungen, Sicherstellung parametrisierter SQL-Queries (Dapper/EF), Authentifizierung mit Token (JWT)
-Findings dokumentieren: (z. B. 0 Critical, 2 Medium, 4 Low)
-XSS: Nicht relevant (keine Web-Oberfläche)
-Passwortschutz: Alle Passwörter gehasht
-semgrep --config=auto .
+```
 
-<details> <summary>Klicken für Semgrep-Ergebnisse</summary>**Findings**: 
+- 🧹 Code Smells vermeiden: Clean Code, Rollenprüfungen, Sicherstellung parametrisierter SQL-Queries (Dapper/EF), Authentifizierung mit Token (JWT)
+- 🗒️ Findings dokumentieren: (z. B. 0 Critical, 2 Medium, 4 Low)
+- 🛡️ XSS: Nicht relevant (keine Web-Oberfläche)
+- 🔑 Passwortschutz: Alle Passwörter gehasht
 
+<details> <summary>Klicken für Semgrep-Ergebnisse</summary>**Findings**:
+
+
+```
 ──── ○○○ ────┐
 │ Semgrep CLI │
 └─────────────┘
@@ -401,7 +410,10 @@ Scanning 86 files (only git-tracked) with:
 ✨ Learn more at https://sg.run/cloud.
 
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+```
 
+
+```
 ┌─────────────────┐
 │ 4 Code Findings │
 └─────────────────┘
@@ -447,7 +459,9 @@ Scanning 86 files (only git-tracked) with:
 
            ▶▶┆ Autofix ▶ USER non-root ENTRYPOINT ["dotnet", "SIMS.Web.dll"]
            30┆ ENTRYPOINT ["dotnet", "SIMS.Web.dll"]
+```
 
+```
 ┌──────────────┐
 │ Scan Summary │
 └──────────────┘
@@ -468,6 +482,7 @@ Es wurden 4 Findings gefunden, keine davon kritisch, aber alle sicherheitsreleva
 SessionController: POST /api/session ändert Serverzustand ohne CSRF-/Antiforgery-Schutz oder strikte Content-Type-Prüfung → in Produktion absichern oder entfernen.
 Dockerfiles (API & Web): Container laufen aktuell als root → künftig eigenen, nicht-privilegierten User verwenden.
 Telegram-Bot-Token liegt in appsettings.json → Token rotieren und in Zukunft nur über Environment-Variablen / Secret-Store, nicht im Git-Repo.
+```
 
 </details>
 
