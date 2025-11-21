@@ -206,7 +206,7 @@ docker exec -it sims-app dotnet SIMS.App.dll
 ````
 
 
-### Docker-Architektur
+## Docker-Architektur
 
 ┌─────────────┐
 │ SIMS.App │
@@ -225,7 +225,7 @@ docker exec -it sims-app dotnet SIMS.App.dll
 │ (SIMSDB) │
 └─────────────┘
 
-## 🔒 Sicherheit
+# 🔒 Sicherheit
 
 ### Aktueller Stand
 
