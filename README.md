@@ -18,12 +18,14 @@
   border-radius: 24px;
   min-height: 300px;">
 
+![Sims Plumbob Banner](https://cdn.wallpapersafari.com/37/76/wG15dM.jpg)
+
 ![Build Status](https://badgen.net/badge/build/passing/green)
 ![Version](https://badgen.net/badge/version/1.0.0/blue)
 ![License](https://badgen.net/badge/license/MIT/green)
 ![.NET](https://badgen.net/badge/.NET/7.0/purple)
 
-
+# <h1 style="color: #ffffff; font-weight: bold;">💎 SIMS - Security Incident Management System</h1>
 
 ## <h1 style="color: #ffffff; font-weight: bold;">📋 Beschreibung</h1>
 
@@ -31,16 +33,16 @@ SIMS (Security Incident Management System) ist ein System zum Protokollieren und
 
 ## <h1 style="color: #ffffff; font-weight: bold;">✨ Features</h1>
 
-- **Vorfall-Management**: Erstellen, Bearbeiten und Schließen von Security-Incidents
-- **Eskalationssystem**: Automatische Weiterleitung mithilfe eines Chatbots
-- **Benutzerverwaltung**: Rollenbasierte Zugriffskontrolle (z. B. Administrator, Benutzer), Nutzer aktivieren/deaktivieren
-- **Logging**: Vollständige Protokollierung aller Systemaktivitäten
-- **Session-Management**: Redis für Session-State, damit z. B. der Vorfall-Entwurf bei Abbruch weiterbearbeitet werden kann
-- **API-Integration**: Authentifizierung und User-Management als Microservice
-- **Notifizierungen**: Übermittlung mithilfe von Chatbot (BOT-Tom)
-- **Dockerized**: Alle Hauptkomponenten laufen in eigenen Docker Containern in einem separaten Network (momentan nur SQL-DB & Redis)
+- **📝 Vorfall-Management**: Erstellen, Bearbeiten und Schließen von Security-Incidents
+- **🤖 Eskalationssystem**: Automatische Weiterleitung mithilfe eines Chatbots
+- **👤 Benutzerverwaltung**: Rollenbasierte Zugriffskontrolle (z. B. Administrator, Benutzer), Nutzer aktivieren/deaktivieren
+- **📋 Logging**: Vollständige Protokollierung aller Systemaktivitäten
+- **🔗 Session-Management**: Redis für Session-State, damit z. B. der Vorfall-Entwurf bei Abbruch weiterbearbeitet werden kann
+- **⚡ API-Integration**: Authentifizierung und User-Management als Microservice
+- **📨 Notifizierungen**: Übermittlung mithilfe von Chatbot (BOT-Tom)
+- **🐳 Dockerized**: Alle Hauptkomponenten laufen in eigenen Docker Containern in einem separaten Network (momentan nur SQL-DB & Redis)
 
-
+![Sims Divider](https://cdn.wallpapersafari.com/37/76/wG15dM.jpg)
 
 ## <h1 style="color: #ffffff; font-weight: bold;">🚀 Systemvoraussetzungen</h1>
 
@@ -53,7 +55,8 @@ SIMS (Security Incident Management System) ist ein System zum Protokollieren und
 
 ##  <h1 style="color: #ffffff; font-weight: bold;">📦 Installation und Start</h1>
 
-### <h3 style="color: #ffffff; font-weight: bold;"> 1. Repository klonen </h3>
+<details> <summary>Klicken für Installationsschritte</summary>
+<h3 style="color: #ffffff; font-weight: bold;"> 1. Repository klonen </h3>
 
 git clone GIT-REPO-URL
 cd SIMS
@@ -63,7 +66,7 @@ cd SIMS
 cd Docker
 docker-compose up -d
 
-### <h3 style="color: #ffffff; font-weight: bold;">  2.1 Docker einzeln starten (Alternative)
+### <h3 style="color: #ffffff; font-weight: bold;"> 💡 2.1 Docker einzeln starten (Alternative)
 
 ```bash
 # SQL-Container für das Projekt
@@ -81,7 +84,7 @@ curl -X POST "http://localhost:5013/api/session?key=testuser&value=john_doe"
 docker exec -it redis-1 redis-cli
 get testuser
 ```
-
+</details>
 
 
 ## <h2 style="color: #ffffff; font-weight: bold;"> 3. Datenbank initialisieren</h2> 
@@ -94,6 +97,15 @@ docker exec -it sims-sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P
 ### <h3 style="color: #ffffff; font-weight: bold;">  4. Anwendung starten </h2>
 
 docker exec -it sims-app dotnet SIMS.App.dll
+
+### <h4 style="color: #ffffff; font-weight: bold;"> Anleitung zur Passworthash Migration von bestehenden SQL Datenbanken:</h4> 
+
+- in der SIMS.API Applikation im Program.cs Zeilen 67-110 wieder reinkommentieren
+- die Zeilen 67-110 in Program.cs sorgen dafür, dass alle bestehenden User Passwörter gehashed werden
+- Anschließend die Applikation einmal starten, damit die Migration durchgeführt wird
+- die Zeilen 67-110 sollen nur für die einmalige Passworthash Migration aktiviert werden
+- danach wieder auskommentieren, damit die Passwörter nicht bei jedem Start erneut gehashed werden
+  </p>
 
 ##   <h1 style="color: #ffffff; font-weight: bold;">🏗️ Architektur</h1>
 
@@ -121,14 +133,14 @@ docker exec -it sims-app dotnet SIMS.App.dll
 │                  (ASP.NET Core)                         │
 │                   Port: 7168                            │
 │                                                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
-│  │   Login      │  │  Incidents   │  │    Users     │ │
-│  │  Controller  │  │  Controller  │  │  Controller  │ │
-│  └──────────────┘  └──────────────┘  └──────────────┘ │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
+│  │   Login      │  │  Incidents   │  │    Users     │   │
+│  │  Controller  │  │  Controller  │  │  Controller  │   │
+│  └──────────────┘  └──────────────┘  └──────────────┘   │
 │                                                         │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │         SimsDbContext (EF Core)                  │  │
-│  └──────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────┐   │
+│  │         SimsDbContext (EF Core)                  │   │
+│  └──────────────────────────────────────────────────┘   │
 └─────────┬───────────────────────────────┬───────────────┘
           │                               │
           ▼                               ▼
@@ -136,10 +148,10 @@ docker exec -it sims-app dotnet SIMS.App.dll
 │    SQL Server       │        │       Redis          │
 │   (Port: 1433)      │        │    (Port: 6379)      │
 │                     │        │                      │
-│  ┌───────────────┐  │        │  ┌────────────────┐ │
-│  │     Users     │  │        │  │    Sessions    │ │
-│  │   Incidents   │  │        │  │   (TTL: 60m)   │ │
-│  └───────────────┘  │        │  └────────────────┘ │
+│  ┌───────────────┐  │        │  ┌────────────────┐  │ 
+│  │     Users     │  │        │  │    Sessions    │  │
+│  │   Incidents   │  │        │  │   (TTL: 60m)   │  │
+│  └───────────────┘  │        │  └────────────────┘  │
 └─────────────────────┘        └──────────────────────┘
           │
           │ Alerts (EscalationLevel ≥ 3)
@@ -152,7 +164,7 @@ docker exec -it sims-app dotnet SIMS.App.dll
 
 
 
-### <h3 style="color: #ffffff; font-weight: bold;"> ER-Diagramm  </h3>
+### <h3 style="color: #ffffff; font-weight: bold;">🔡  ER-Diagramm  </h3>
 
 ```
 +----------------------+
@@ -190,7 +202,7 @@ docker exec -it sims-app dotnet SIMS.App.dll
 
 ```
 
-### <h3 style="color: #ffffff; font-weight: bold;"> Redis Datenbank  </h3> 
+### <h3 style="color: #ffffff; font-weight: bold;">🗃️ Redis Datenbank  </h3> 
 ```
 | Key Pattern                  | Value Type            | Example             | Purpose                                    |
 |------------------------------|-----------------------|---------------------|--------------------------------------------|
@@ -290,63 +302,7 @@ classDiagram
 ```
 
 
-
-### <h3 style="color: #ffffff; font-weight: bold;"> Klassendiagramm  </h3>
-```
-+----------------------------------------------------------+
-|                      RoleType (enum)                     |
-|----------------------------------------------------------|
-| Admin, User                                              |
-+----------------------------------------------------------+
-
-+------------------+      +---------------+            +-----------+
-|      User        |<>----|   Incident    |<>----------|   Log     |
-+------------------+      +---------------+            +-----------+
-| Id               |      | Id            |            | Id        |
-| Username         |      | ReporterId    |            | Timestamp |
-| PasswordHash     |      | HandlerId     |            | Loglevel  |
-| Email            |      | Description   |            | Message   |
-| Role: RoleType   |      | Severity      |            | UserId    |
-| Enabled          |      | Status        |            +-----------+
-| CreatedAt        |      | CVE           |     
-+------------------+      | EscalationLvl |     (User meldet Incident)
-| +Validate()      |      | System        |     (Incident erzeugt Log)
-| +Disable()       |      | CreatedAt     |
-| +Enable()        |      | ClosedAt      |
-+------------------+      +---------------+
-                                      
-           +------------------------------+
-           |      IRepository (Interface) |
-           |------------------------------|
-           | +GetById(id)                 |
-           | +GetAll()                    |
-           | +Add(entity)                 |
-           | +Update(entity)              |
-           | +Delete(id)                  |
-           +--------------+---------------+
-                          ^
-           +--------------|---------------+
-           |              |               |
-    +----------------+ +----------------+ +--------------+
-    | UserRepository | |IncidentRepository| |LogRepository|
-    +----------------+ +----------------+ +--------------+
-
-+-------------------------+      +------------------------+
-| INotificationService    |      |   NotificationService  |
-|-------------------------|      +------------------------+
-| +Notify(userId, msg)    |<-----| implements             |
-+-------------------------+      +------------------------+
-
-+------------------+
-|  AuthService     |
-+------------------+
-+----------------------+
-| RedisSessionService  |
-+----------------------+
-````
-
-
-### <h3 style="color: #ffffff; font-weight: bold;"> Docker-Architektur </h3>
+### <h3 style="color: #ffffff; font-weight: bold;"> 🐳 Docker-Architektur </h3>
 ```
       ┌──────────────────────┐
       │     SIMS.App         │
@@ -363,59 +319,54 @@ classDiagram
                    │ (SIMSDB)    │
                    └─────────────┘
 ````
-## 🔒 Sicherheit
+## 🛡️ Sicherheit
 
 ### <h3 style="color: #ffffff; font-weight: bold;"> Aktueller Stand  </h3>
 
-- **Authentifizierung & Sessions**
+- **👤 Authentifizierung & Sessions**
   - Login über die API, Session-Daten werden in Redis gespeichert (`RedisSessionService`).
   - Ein API-Key ist in der Konfiguration vorgesehen (`Security:ApiKey`), um geschützte Endpunkte abzusichern.
 
-- **Passwortschutz**
+- **🔒 Passwortschutz**
   - Passwörter werden nicht im Klartext gespeichert, sondern vor dem Speichern gehasht (`PasswordHasher`).
   - Damit landen echte Passwörter weder in der Datenbank noch in Logs.
 
-- **Datenbankzugriff**
+- **🗄️ Datenbankzugriff**
   - Zugriff auf SQL Server erfolgt ausschließlich über Entity Framework Core (parametrisierte Zugriffe, keine selbstgebauten SQL-Strings) → reduziert das Risiko klassischer SQL-Injection.
   - Das Schema (User, Incident, Log) wird über EF-Migrations verwaltet.
 
-- **Transport & Konfiguration**
+- **🚚 Transport & Konfiguration**
   - Die API ist für HTTPS-Betrieb ausgelegt (Kestrel Dev-Zertifikat).
   - Sensible Werte wie ConnectionStrings, API-Key und Telegram-Bot-Token liegen in `appsettings*.json` und können für produktive Umgebungen über Environment-Variablen/Secret-Store gesetzt werden.
 
-- **Nachvollziehbarkeit**
+- **🕵️‍♂️ Nachvollziehbarkeit**
   - Incidents speichern Zeitstempel (CreatedAt/ClosedAt), Reporter/Handler und Severity.
   - Redis wird genutzt, um z. B. `last_access` oder `last_incident_created` für einfache Session-/Aktivitätsverfolgung zu halten.
 
 
 ### <h3 style="color: #ffffff; font-weight: bold;"> Mögliche Security-Erweiterungen </h3>
-### Mögliche Security-Erweiterungen
-
-- **Rollen & Rechte schärfen**  
+- **🎚️ Rollen & Rechte schärfen**  
   Admin-Endpunkte klar trennen und nur für Admin-Rollen freigeben.
 
-- **Login & Sessions absichern**  
+- **🔑  Login & Sessions absichern**  
   Rate-Limiting, Lockout nach mehreren Fehlversuchen, kürzere Session-Dauer.
 
-- **Secrets sicher speichern**  
+- **🧩 Secrets sicher speichern**  
   DB-Passwort, API-Key, Bot-Token per Environment-Variablen / Secret-Store statt in `appsettings.json`.
 
-- **Audit-Logs nutzen**  
+- **📋 Audit-Logs nutzen**  
   Log-Tabelle verwenden für wichtige Aktionen (Logins, Rollenänderungen, Incident-Eskalationen).
 
-- **HTTP-Schnittstelle härten**  
+- **🕸️ HTTP-Schnittstelle härten**  
   Security-Header setzen und technische Details in Fehlermeldungen nach außen vermeiden.
 
-- **Automatisierte Code-Scans**  
+- **💻 Automatisierte Code-Scans**  
   Semgrep regelmäßig in einer CI-Pipeline laufen lassen.
 
 
 ####   <h1 style="color: #ffffff; font-weight: bold;">🔒 SAST</h1> 
 
-### <h3 style="color: #ffffff; font-weight: bold;"> Semgrep-Ergebnisse </h3> 
-### Statische Analyse (SAST)
-
-- Der Code kann mit **Semgrep** analysiert werden, z. B.:
+### <h3 style="color: #ffffff; font-weight: bold;"> Semgrep Prüfung </h3> 
 
   ```bash
   semgrep --config=auto .
@@ -428,7 +379,9 @@ Findings dokumentieren: (z. B. 0 Critical, 2 Medium, 4 Low)
 XSS: Nicht relevant (keine Web-Oberfläche)
 Passwortschutz: Alle Passwörter gehasht
 semgrep --config=auto .
-Findings:
+
+<details> <summary>Klicken für Semgrep-Ergebnisse</summary>**Findings**: 
+
 ──── ○○○ ────┐
 │ Semgrep CLI │
 └─────────────┘
@@ -516,6 +469,7 @@ SessionController: POST /api/session ändert Serverzustand ohne CSRF-/Antiforger
 Dockerfiles (API & Web): Container laufen aktuell als root → künftig eigenen, nicht-privilegierten User verwenden.
 Telegram-Bot-Token liegt in appsettings.json → Token rotieren und in Zukunft nur über Environment-Variablen / Secret-Store, nicht im Git-Repo.
 
+</details>
 
 ## <h1 style="color: #ffffff; font-weight: bold;"> 📊 Versionshistorie</h1> 
 
@@ -556,9 +510,12 @@ Permission is hereby granted, free of charge, to any person obtaining a copy...
 
 ## <h1 style="color: #ffffff; font-weight: bold;">👥 Mitwirkende</h1>  
 
-- Esra Aktas - Frontend Entwicklung, Klassendiagramm, Read Me, Docker, Webdesign, WebSession
-- Sophie Stereb - Chat-Bot, Security Maßnahmen, Docker (Api&Web)
-- Sasa Vladuljevic - API-Entwicklung/Authentifizierung, Datenbank(SQL), Redis, SBOM, Password Hashing
+<h3 style="color: #ffffff; font-weight: bold;"> 👩‍💻 Esra Aktas</h3>   
+     Frontend Entwicklung, Klassendiagramm, Read Me, Docker, Webdesign, WebSession
+<h3 style="color: #ffffff; font-weight: bold;">👩‍💻  Sophie Stereb </h3>
+     Chat-Bot, Security Maßnahmen, Docker (Api&Web)
+<h3 style="color: #ffffff; font-weight: bold;"> 👨‍💻 Sasa Vladuljevic </h3> 
+      API-Entwicklung/Authentifizierung, Datenbank(SQL), Redis, SBOM, Password Hashing
 
 ## <h1 style="color: #ffffff; font-weight: bold;"> 🔗 Links</h1>  
 
@@ -569,13 +526,4 @@ Permission is hereby granted, free of charge, to any person obtaining a copy...
 
 Bei Fragen oder Problemen: sims-support@ustp-students.at
 
-
-### <h4 style="color: #ffffff; font-weight: bold;"> Anleitung zur Passworthash Migration von bestehenden SQL Datenbanken:</h4> 
-
-- in der SIMS.API Applikation im Program.cs Zeilen 67-110 wieder reinkommentieren
-- die Zeilen 67-110 in Program.cs sorgen dafür, dass alle bestehenden User Passwörter gehashed werden
-- Anschließend die Applikation einmal starten, damit die Migration durchgeführt wird
-- die Zeilen 67-110 sollen nur für die einmalige Passworthash Migration aktiviert werden
-- danach wieder auskommentieren, damit die Passwörter nicht bei jedem Start erneut gehashed werden
-  </p>
 </div>
