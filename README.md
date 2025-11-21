@@ -235,12 +235,6 @@ docker exec -it sims-app dotnet SIMS.App.dll
   - Incidents speichern Zeitstempel (CreatedAt/ClosedAt), Reporter/Handler und Severity.
   - Redis wird genutzt, um z. B. `last_access` oder `last_incident_created` für einfache Session-/Aktivitätsverfolgung zu halten.
 
-### Statische Analyse (SAST)
-
-- Der Code kann mit **Semgrep** analysiert werden, z. B.:
-
-  ```bash
-  semgrep --config=auto .
 
 ### Mögliche Security-Erweiterungen
 
