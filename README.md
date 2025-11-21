@@ -77,6 +77,7 @@ curl -X POST "http://localhost:5013/api/incidents" \
     "CreatedAt": "2025-11-13T10:00:00"
   }'
 
+exit
 
 
 
