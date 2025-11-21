@@ -225,142 +225,112 @@ docker exec -it sims-app dotnet SIMS.App.dll
 │ (SIMSDB) │
 └─────────────┘
 
-# 🔒 Sicherheit
-
-### Aktueller Stand
-
-- **Authentifizierung & Sessions**
-  - Login über die API, Session-Daten werden in Redis gespeichert (`RedisSessionService`).
-  - Ein API-Key ist in der Konfiguration vorgesehen (`Security:ApiKey`), um geschützte Endpunkte abzusichern.
-
-- **Passwortschutz**
-  - Passwörter werden nicht im Klartext gespeichert, sondern vor dem Speichern gehasht (`PasswordHasher`).
-  - Damit landen echte Passwörter weder in der Datenbank noch in Logs.
-
-- **Datenbankzugriff**
-  - Zugriff auf SQL Server erfolgt ausschließlich über Entity Framework Core (parametrisierte Zugriffe, keine selbstgebauten SQL-Strings) → reduziert das Risiko klassischer SQL-Injection.
-  - Das Schema (User, Incident, Log) wird über EF-Migrations verwaltet.
-
-- **Transport & Konfiguration**
-  - Die API ist für HTTPS-Betrieb ausgelegt (Kestrel Dev-Zertifikat).
-  - Sensible Werte wie ConnectionStrings, API-Key und Telegram-Bot-Token liegen in `appsettings*.json` und können für produktive Umgebungen über Environment-Variablen/Secret-Store gesetzt werden.
-
-- **Nachvollziehbarkeit**
-  - Incidents speichern Zeitstempel (CreatedAt/ClosedAt), Reporter/Handler und Severity.
-  - Redis wird genutzt, um z. B. `last_access` oder `last_incident_created` für einfache Session-/Aktivitätsverfolgung zu halten.
-
-
-### Mögliche Security-Erweiterungen
-
-- **Rollen & Rechte schärfen**  
-  Admin-Endpunkte klar trennen und nur für Admin-Rollen freigeben.
-
-- **Login & Sessions absichern**  
-  Rate-Limiting, Lockout nach mehreren Fehlversuchen, kürzere Session-Dauer.
-
-- **Secrets sicher speichern**  
-  DB-Passwort, API-Key, Bot-Token per Environment-Variablen / Secret-Store statt in `appsettings.json`.
-
-- **Audit-Logs nutzen**  
-  Log-Tabelle verwenden für wichtige Aktionen (Logins, Rollenänderungen, Incident-Eskalationen).
-
-- **HTTP-Schnittstelle härten**  
-  Security-Header setzen und technische Details in Fehlermeldungen nach außen vermeiden.
-
-- **Automatisierte Code-Scans**  
-  Semgrep regelmäßig in einer CI-Pipeline laufen lassen.
-
-
-## 🔒 SAST
-
-### Semgrep-Ergebnisse
-
-**Semgrep Prüfung**
-
+🔒 Sicherheit
+Aktueller Stand
+Authentifizierung & Sessions
+Login über die API, Session-Daten werden in Redis gespeichert (RedisSessionService).
+Ein API-Key ist in der Konfiguration vorgesehen (Security:ApiKey), um geschützte Endpunkte abzusichern.
+Passwortschutz
+Passwörter werden nicht im Klartext gespeichert, sondern vor dem Speichern gehasht (PasswordHasher).
+Damit landen echte Passwörter weder in der Datenbank noch in Logs.
+Datenbankzugriff
+Zugriff auf SQL Server erfolgt ausschließlich über Entity Framework Core (parametrisierte Zugriffe, keine selbstgebauten SQL-Strings) → reduziert das Risiko klassischer SQL-Injection.
+Das Schema (User, Incident, Log) wird über EF-Migrations verwaltet.
+Transport & Konfiguration
+Die API ist für HTTPS-Betrieb ausgelegt (Kestrel Dev-Zertifikat).
+Sensible Werte wie ConnectionStrings, API-Key und Telegram-Bot-Token liegen in appsettings*.json und können für produktive Umgebungen über Environment-Variablen/Secret-Store gesetzt werden.
+Nachvollziehbarkeit
+Incidents speichern Zeitstempel (CreatedAt/ClosedAt), Reporter/Handler und Severity.
+Redis wird genutzt, um z. B. last_access oder last_incident_created für einfache Session-/Aktivitätsverfolgung zu halten.
+Mögliche Security-Erweiterungen
+Rollen & Rechte schärfen
+Admin-Endpunkte klar trennen und nur für Admin-Rollen freigeben.
+Login & Sessions absichern
+Rate-Limiting, Lockout nach mehreren Fehlversuchen, kürzere Session-Dauer.
+Secrets sicher speichern
+DB-Passwort, API-Key, Bot-Token per Environment-Variablen / Secret-Store statt in appsettings.json.
+Audit-Logs nutzen
+Log-Tabelle verwenden für wichtige Aktionen (Logins, Rollenänderungen, Incident-Eskalationen).
+HTTP-Schnittstelle härten
+Security-Header setzen und technische Details in Fehlermeldungen nach außen vermeiden.
+Automatisierte Code-Scans
+Semgrep regelmäßig in einer CI-Pipeline laufen lassen.
+🔒 SAST
+Semgrep-Ergebnisse
+Semgrep Prüfung
 semgrep --config=auto .
--   **Code Smells vermeiden:**  Clean Code, Rollenprüfungen, Sicherstellung parametrisierter SQL-Queries (Dapper/EF), Authentifizierung mit Token (JWT)
-    
--   **Findings dokumentieren:**  (z. B. 0 Critical, 2 Medium, 4 Low)
-    
--   **XSS:**  Nicht relevant (keine Web-Oberfläche)
-    
--   **Passwortschutz:**  Alle Passwörter gehasht
-
+Code Smells vermeiden: Clean Code, Rollenprüfungen, Sicherstellung parametrisierter SQL-Queries (Dapper/EF), Authentifizierung mit Token (JWT)
+Findings dokumentieren: (z. B. 0 Critical, 2 Medium, 4 Low)
+XSS: Nicht relevant (keine Web-Oberfläche)
+Passwortschutz: Alle Passwörter gehasht
 semgrep --config=auto .
-
-**Findings**: 
-
+Findings:
 ──── ○○○ ────┐
 │ Semgrep CLI │
 └─────────────┘
 
-                                                                                                                     
 Scanning 86 files (only git-tracked) with:
-                                      
+
 ✔ Semgrep OSS
   ✔ Basic security coverage for first-party code vulnerabilities.
-                                              
+
 ✘ Semgrep Code (SAST)
-  ✘ Find and fix vulnerabilities in the code you write with advanced scanning and expert security     
-rules.                                                                                                               
-                                                     
+  ✘ Find and fix vulnerabilities in the code you write with advanced scanning and expert security rules.
+
 ✘ Semgrep Supply Chain (SCA)
   ✘ Find and fix the reachable vulnerabilities in your OSS dependencies.
-                                                                            
+
 💎 Get started with all Semgrep products via `semgrep login`.
-✨ Learn more at https://sg.run/cloud.                        
-                                                                            
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00                                                                                                                     
-                   
-                   
+✨ Learn more at https://sg.run/cloud.
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+
 ┌─────────────────┐
 │ 4 Code Findings │
 └─────────────────┘
-                                                            
+
     SIMS.API/Controllers/SessionController.cs
     ❯❱ csharp.dotnet.security.mvc-missing-antiforgery.mvc-missing-antiforgery
           Set is a state-changing MVC method that does not validate the antiforgery token or do strict     
           content-type checking. State-changing controller methods should either enforce antiforgery tokens
           or do strict content-type checking to prevent simple HTTP request types from bypassing CORS      
-          preflight controls.                                                                              
-          Details: https://sg.run/Y0Jy                                                                     
-                                                                                                           
+          preflight controls.
+          Details: https://sg.run/Y0Jy     
+
            16┆ [HttpPost]
            17┆ public IActionResult Set([FromQuery] string key, [FromQuery] string value)
            18┆ {
            19┆     _service.SetSession(key, value);
            20┆     return Ok();
            21┆ }
-                                      
+
     SIMS.API/Dockerfile
    ❯❯❱ dockerfile.security.missing-user-entrypoint.missing-user-entrypoint
           By not specifying a USER, a program in the container may run as 'root'. This is a security  
           hazard. If an attacker can control a process running as root, they may have control over the
-          container. Ensure that the last USER in a Dockerfile is a USER other than 'root'.           
-          Details: https://sg.run/k281                                                                
-                                                                                                      
+          container. Ensure that the last USER in a Dockerfile is a USER other than 'root'.
+          Details: https://sg.run/k281
+
            ▶▶┆ Autofix ▶ USER non-root ENTRYPOINT ["dotnet", "SIMS.API.dll"]
            29┆ ENTRYPOINT ["dotnet", "SIMS.API.dll"]
-                                            
+
     SIMS.API/appsettings.json
    ❯❯❱ generic.secrets.security.detected-telegram-bot-api-key.detected-telegram-bot-api-key
           Telegram Bot API Key detected
           Details: https://sg.run/nd4b 
-                                       
+
            26┆ "BotToken": "8213041452:AAGWnzP24LhV57jRdoaP0IA-JOcpuDCrtik",
-                                      
+
     SIMS.Web/Dockerfile
    ❯❯❱ dockerfile.security.missing-user-entrypoint.missing-user-entrypoint
           By not specifying a USER, a program in the container may run as 'root'. This is a security  
           hazard. If an attacker can control a process running as root, they may have control over the
-          container. Ensure that the last USER in a Dockerfile is a USER other than 'root'.           
-          Details: https://sg.run/k281                                                                
-                                                                                                      
+          container. Ensure that the last USER in a Dockerfile is a USER other than 'root'.
+          Details: https://sg.run/k281
+
            ▶▶┆ Autofix ▶ USER non-root ENTRYPOINT ["dotnet", "SIMS.Web.dll"]
            30┆ ENTRYPOINT ["dotnet", "SIMS.Web.dll"]
 
-                
-                
 ┌──────────────┐
 │ Scan Summary │
 └──────────────┘
@@ -376,13 +346,11 @@ Ran 133 rules on 86 files: 4 findings.
 ⚡ Supercharge Semgrep OSS when you create a free account at https://sg.run/rules.
 
 ⏫ A new version of Semgrep is available. See https://semgrep.dev/docs/upgrading
-
 Fazit zu den Findings:
-
 Es wurden 4 Findings gefunden, keine davon kritisch, aber alle sicherheitsrelevant.
 SessionController: POST /api/session ändert Serverzustand ohne CSRF-/Antiforgery-Schutz oder strikte Content-Type-Prüfung → in Produktion absichern oder entfernen.
 Dockerfiles (API & Web): Container laufen aktuell als root → künftig eigenen, nicht-privilegierten User verwenden.
-Telegram-Bot-Token liegt in appsettings.json → Token rotieren und in Zukunft nur über Environment-Variablen / Secret-Store, nicht im Git-Repo. 
+Telegram-Bot-Token liegt in appsettings.json → Token rotieren und in Zukunft nur über Environment-Variablen / Secret-Store, nicht im Git-Repo.
 
 
 ## 📊 Versionshistorie
