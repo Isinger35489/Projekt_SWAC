@@ -1,4 +1,5 @@
-  <div style="
+ <!-- banner funktioniert in github nicht deshalb wurde es auskommentiert
+ <div style="
   background: url('https://cdn.wallpapersafari.com/37/76/wG15dM.jpg') center/cover no-repeat;
   padding: 40px;
   border-radius: 20px;
@@ -17,7 +18,7 @@
   padding: 36px 24px;
   border-radius: 24px;
   min-height: 300px;">
-
+-->
 ![Sims Plumbob Banner](https://cdn.wallpapersafari.com/37/76/wG15dM.jpg)
 
 ![Build Status](https://badgen.net/badge/build/passing/green)
@@ -26,7 +27,6 @@
 ![.NET](https://badgen.net/badge/.NET/7.0/purple)
 
 # <h1 style="color: #ffffff; font-weight: bold;">💎 SIMS - Security Incident Management System</h1>
-
 ## <h1 style="color: #ffffff; font-weight: bold;">📋 Beschreibung</h1>
 
 SIMS (Security Incident Management System) ist ein System zum Protokollieren und Verwalten von IT-Sicherheitsvorfällen. Es ermöglicht die manuelle Erfassung von sicherheitsrelevanten Vorfällen, Eskalation an zuständige Bearbeiter, Benutzer- und Rollenverwaltung sowie Benachrichtigungen über verschiedene Kanäle.
