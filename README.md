@@ -224,38 +224,62 @@ docker exec -it sims-app dotnet SIMS.App.dll
 │ SQL Server │
 │ (SIMSDB) │
 └─────────────┘
+````
 
-🔒 Sicherheit
-Aktueller Stand
-Authentifizierung & Sessions
-Login über die API, Session-Daten werden in Redis gespeichert (RedisSessionService).
-Ein API-Key ist in der Konfiguration vorgesehen (Security:ApiKey), um geschützte Endpunkte abzusichern.
-Passwortschutz
-Passwörter werden nicht im Klartext gespeichert, sondern vor dem Speichern gehasht (PasswordHasher).
-Damit landen echte Passwörter weder in der Datenbank noch in Logs.
-Datenbankzugriff
-Zugriff auf SQL Server erfolgt ausschließlich über Entity Framework Core (parametrisierte Zugriffe, keine selbstgebauten SQL-Strings) → reduziert das Risiko klassischer SQL-Injection.
-Das Schema (User, Incident, Log) wird über EF-Migrations verwaltet.
-Transport & Konfiguration
-Die API ist für HTTPS-Betrieb ausgelegt (Kestrel Dev-Zertifikat).
-Sensible Werte wie ConnectionStrings, API-Key und Telegram-Bot-Token liegen in appsettings*.json und können für produktive Umgebungen über Environment-Variablen/Secret-Store gesetzt werden.
-Nachvollziehbarkeit
-Incidents speichern Zeitstempel (CreatedAt/ClosedAt), Reporter/Handler und Severity.
-Redis wird genutzt, um z. B. last_access oder last_incident_created für einfache Session-/Aktivitätsverfolgung zu halten.
-Mögliche Security-Erweiterungen
-Rollen & Rechte schärfen
-Admin-Endpunkte klar trennen und nur für Admin-Rollen freigeben.
-Login & Sessions absichern
-Rate-Limiting, Lockout nach mehreren Fehlversuchen, kürzere Session-Dauer.
-Secrets sicher speichern
-DB-Passwort, API-Key, Bot-Token per Environment-Variablen / Secret-Store statt in appsettings.json.
-Audit-Logs nutzen
-Log-Tabelle verwenden für wichtige Aktionen (Logins, Rollenänderungen, Incident-Eskalationen).
-HTTP-Schnittstelle härten
-Security-Header setzen und technische Details in Fehlermeldungen nach außen vermeiden.
-Automatisierte Code-Scans
-Semgrep regelmäßig in einer CI-Pipeline laufen lassen.
-🔒 SAST
+##🔒 Sicherheit
+
+## 🔒 Sicherheit
+
+### Aktueller Stand
+
+- **Authentifizierung & Sessions**
+  - Login über die API, Session-Daten werden in Redis gespeichert (`RedisSessionService`).
+  - Ein API-Key ist in der Konfiguration vorgesehen (`Security:ApiKey`), um geschützte Endpunkte abzusichern.
+
+- **Passwortschutz**
+  - Passwörter werden nicht im Klartext gespeichert, sondern vor dem Speichern gehasht (`PasswordHasher`).
+  - Damit landen echte Passwörter weder in der Datenbank noch in Logs.
+
+- **Datenbankzugriff**
+  - Zugriff auf SQL Server erfolgt ausschließlich über Entity Framework Core (parametrisierte Zugriffe, keine selbstgebauten SQL-Strings) → reduziert das Risiko klassischer SQL-Injection.
+  - Das Schema (User, Incident, Log) wird über EF-Migrations verwaltet.
+
+- **Transport & Konfiguration**
+  - Die API ist für HTTPS-Betrieb ausgelegt (Kestrel Dev-Zertifikat).
+  - Sensible Werte wie ConnectionStrings, API-Key und Telegram-Bot-Token liegen in `appsettings*.json` und können für produktive Umgebungen über Environment-Variablen/Secret-Store gesetzt werden.
+
+- **Nachvollziehbarkeit**
+  - Incidents speichern Zeitstempel (CreatedAt/ClosedAt), Reporter/Handler und Severity.
+  - Redis wird genutzt, um z. B. `last_access` oder `last_incident_created` für einfache Session-/Aktivitätsverfolgung zu halten.
+
+### Mögliche Security-Erweiterungen
+
+- **Rollen & Rechte schärfen**  
+  Admin-Endpunkte klar trennen und nur für Admin-Rollen freigeben.
+
+- **Login & Sessions absichern**  
+  Rate-Limiting, Lockout nach mehreren Fehlversuchen, kürzere Session-Dauer.
+
+- **Secrets sicher speichern**  
+  DB-Passwort, API-Key, Bot-Token per Environment-Variablen / Secret-Store statt in `appsettings.json`.
+
+- **Audit-Logs nutzen**  
+  Log-Tabelle verwenden für wichtige Aktionen (Logins, Rollenänderungen, Incident-Eskalationen).
+
+- **HTTP-Schnittstelle härten**  
+  Security-Header setzen und technische Details in Fehlermeldungen nach außen vermeiden.
+
+- **Automatisierte Code-Scans**  
+  Semgrep regelmäßig in einer CI-Pipeline laufen lassen.
+
+
+### Statische Analyse (SAST)
+
+- Der Code kann mit **Semgrep** analysiert werden, z. B.:
+
+  ```bash
+  semgrep --config=auto .
+
 Semgrep-Ergebnisse
 Semgrep Prüfung
 semgrep --config=auto .
