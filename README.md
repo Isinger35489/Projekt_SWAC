@@ -13,13 +13,13 @@ SIMS (Security Incident Management System) ist ein System zum Protokollieren und
 ## ✨ Features
 
 - **Vorfall-Management**: Erstellen, Bearbeiten und Schließen von Security-Incidents
-- **Eskalationssystem**: Automatische Weiterleitung an zuständige Bearbeiter mit Level-System
+- **Eskalationssystem**: Automatische Weiterleitung mithilfe eines Chatbots
 - **Benutzerverwaltung**: Rollenbasierte Zugriffskontrolle (z. B. Administrator, Benutzer), Nutzer aktivieren/deaktivieren
 - **Logging**: Vollständige Protokollierung aller Systemaktivitäten
 - **Session-Management**: Redis für Session-State, damit z. B. der Vorfall-Entwurf bei Abbruch weiterbearbeitet werden kann
-- **API-Integration**: Authentifizierung und User-Management als Microservice, Schnittstellen-Datei (z. B. für Monitoring-Tools wie Nagios/Prometheus)
-- **Notifizierungen**: Grundgerüst für Message-Bus, Email, SMS und weitere Kanäle
-- **Dockerized**: Alle Hauptkomponenten laufen in eigenen Docker Containern in einem separaten Network
+- **API-Integration**: Authentifizierung und User-Management als Microservice
+- **Notifizierungen**: Übermittlung mithilfe von Chatbot (BOT-Tom)
+- **Dockerized**: Alle Hauptkomponenten laufen in eigenen Docker Containern in einem separaten Network (momentan nur SQL-DB & Redis)
 
 
 
@@ -83,6 +83,7 @@ docker exec -it sims-app dotnet SIMS.App.dll
 
 ### ER-Diagramm
 
+
 ```
 +----------------------+
 |        User          |
@@ -130,14 +131,11 @@ docker exec -it sims-app dotnet SIMS.App.dll
 | + UserId : int       | (FK -> User)
 +----------------------+
 ```
-
 -   User (Administrator, Benutzer, aktiviert/deaktiviert)
     
--   Incident (Schweregrad, Status, CVE, Zeitstempel, ... ggf. Handler)
+-   Incident (Status, CVE, Zeitstempel, Handler, Reporter, Alert-Level (Escalation Level), Severity, System, Beschreibung)
     
--   Escalation (optional eigene Tabelle, sonst als Incident-Status)
-    
--   Log (Aktionen, Fehler, User)
+-   Log (Usersessions)
 
 ### Klassendiagramm
 ```
@@ -237,19 +235,23 @@ semgrep --config=auto .
 ## 📊 Versionshistorie
 
 ### Version 1.0.0 (2025-11-08)
-- Fertiges, dockerisiertes System für alle Kernfeatueres
+- Fertiges, dockerisiertes System für SQL Datenbank und Redis
+- Entity Framework Core Integration / EF-Migration
 - Vorfallmanagement & Logging
 - Benutzerverwaltung & Authentifizierung (REST)
-- Docker-Integration
+- Docker-Integration (Dockerfiles für API, Web noch in Weiterentwicklung)
 - Redis Session-Management integriert
+- Web-Frontend mit Login & Logout mit Web-Sessions
+- Passwort Hashing
+- Chatbot (BOT-Tom)
 - Semgrep-Check
 
 ## 🗺️ Roadmap
 
 ### Version 1.1.0 (geplant Q1 2026)
-- [ ] Entity Framework Core Integration /EF-Migration
-- [ ] Azure Service Bus /Message Queue für Notifications
-- [ ] Web-Frontend
+- [ ] komplette Docker-Integration
+- [ ] Erweiterung der Web-Applikaton (Einbau von Chatbot-Assistent)
+
 
 ### Version 1.2.0 (geplant Q2 2026)
 - [ ] LDAP/Active Directory Integration
@@ -267,14 +269,14 @@ Permission is hereby granted, free of charge, to any person obtaining a copy...
 
 ## 👥 Mitwirkende
 
-- Esra Aktas- Projektleitung & Backend-Entwicklung
-- Sophie Stereb - API-Entwicklung/Authentifizierung
-- Sasa Vladuljevic - Docker & DevOps
+- Esra Aktas - Frontend Entwicklung, Klassendiagramm, Read Me, Docker
+- Sophie Stereb - API-Entwicklung/Authentifizierung, Datenbank(SQL), Redis
+- Sasa Vladuljevic - Chat-Bot, Security Maßnahmen, Docker
 
 ## 🔗 Links
 
-- **GIT Repository**: https://git.nwt.fhstp.ac.at/username/SIMS
-- **Issue Tracker**: https://git.nwt.fhstp.ac.at/username/SIMS/issues
+- **GIT Repository**: https://github.com/Isinger35489/Projekt_SWAC/
+- **Issue Tracker**: https://github.com/Isinger35489/Projekt_SWAC/issues
 
 ## 📞 Support (in Außnahmefällen)
 

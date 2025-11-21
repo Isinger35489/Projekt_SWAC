@@ -49,3 +49,147 @@ h1:focus {
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
 }
+body {
+    background: linear-gradient(135deg, #d5f3f9 0%, #fff 100%);
+    min-height: 100vh;
+}
+
+.sidebar {
+    background: #1ec61a;
+    color: #fff;
+    width: 230px;
+    min-height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.sidebar-header, .navbar-brand {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-size: 2rem;
+    color: #ffff00;
+    text-shadow: 2px 2px 0 #146410;
+}
+
+.nav-link, .sidebar .nav-link {
+    color: #fff;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    transition: background .2s;
+    border-radius: 20px;
+}
+
+    .nav-link.active, .nav-link:hover {
+        background: #d5f3f9;
+        color: #1ec61a !important;
+        font-weight: bold;
+    }
+
+h3, h4 {
+    color: #1ec61a;
+    text-shadow: 1px 1px 0 #d5f3f9;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+.btn, button, [type=submit] {
+    border-radius: 25px;
+    box-shadow: 0 0 8px #23C16B;
+    background: linear-gradient(90deg, #39C760, #A4E9E0);
+    color: #fff;
+    border: 2px solid #39C760;
+    font-size: 1.1rem;
+    padding: 8px 20px;
+    margin: 3px 0;
+    transition: box-shadow 0.2s, background 0.2s;
+}
+
+.btn-danger {
+    background: #ea2121;
+    border: 2px solid #ea2121;
+}
+
+.btn:hover, button:hover, [type=submit]:hover {
+    box-shadow: 0 0 24px #23C16B;
+    background: linear-gradient(90deg, #A4E9E0, #39C760);
+}
+
+.table {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 16px #d6e8c5;
+}
+.page {
+    display: flex;
+    flex-direction: row;
+}
+
+main {
+    margin-left: 230px; 
+    width: 100%;
+    background: transparent;
+}
+
+/* Button Glow & Hover */
+.btn, .btn-danger {
+    border-radius: 25px;
+    box-shadow: 0 0 8px #23C16B;
+    background: linear-gradient(90deg, #39C760, #A4E9E0);
+    color: #fff;
+    border: 2px solid #39C760;
+    font-size: 1.1rem;
+    transition: box-shadow 0.2s, background 0.2s;
+}
+
+
+/* Card/Panels mit Muster (Pseudo-Element für Wasserblasen) */
+.panel, .card {
+    border-radius: 18px;
+    background: #e8fdf6;
+    position: relative;
+    box-shadow: 0 2px 12px #A4E9E0;
+}
+
+/*    .panel::after {
+        content: "";
+        position: absolute;
+        background: url('bubble-pattern.png');
+        opacity: 0.12;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 18px;
+        z-index: 0;
+    }
+*/
+
+    .panel::after, .card::after {
+        content: "";
+        position: absolute;
+        background: url('bubble-pattern.png');
+        opacity: 0.12;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 18px;
+        z-index: 0;
+    }
+
+.plumbob {
+    width: 42px;
+    height: 70px;
+    background: url('plumbob.svg') center center / contain no-repeat;
+    animation: plumbob-shake 1.4s infinite;
+}
+
+@keyframes plumbob-shake {
+    0%, 100% {
+        transform: rotate(-7deg);
+    }
+
+    50% {
+        transform: rotate(7deg);
+    }
+}

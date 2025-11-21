@@ -7,7 +7,7 @@
 @inject LoginState UserState
 @inject HttpClient Http
 
-@* @if (isValidatingSession)
+@if (isValidatingSession)
 {
     <div class="alert alert-info">
         <p>Session wird validiert...</p>
@@ -21,15 +21,15 @@ else if (!UserState.IsLoggedIn)
 }
 else
 {
-    @* Header mit User-Info und Logout-Button *@
-@*     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px; background: #f5f5f5; border-radius: 6px;">
+   @* Header mit User-Info und Logout-Button*@
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px; background: #f5f5f5; border-radius: 6px;">
         <div>
-            <h3 style="margin: 0;">Incidents</h3>
+            <h3 style="margin: 0;">Benutzerverwaltung</h3>
             <small>Eingeloggt als: <strong>@UserState.Username</strong> (@UserState.Role)</small>
         </div>
         <button @onclick="Logout" class="btn btn-danger">Logout</button>
     </div>
- *@ 
+ 
 
 @* 
 @if (!UserState.IsLoggedIn)
@@ -38,19 +38,26 @@ else
     <div>Umleitung zum Login...</div>
     return;
 } *@
-
+@* 
 @if (showRedirectMessage)
 {
     <div class="alert alert-info">
         <p>Sie sind nicht angemeldet. Weiterleitung zum Login...</p>
     </div>
 }
-else
-{
+else *@
+@*
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px; background: #f5f5f5; border-radius: 6px;">
+        <div>
+            <h3 style="margin: 0;">Benutzerverwaltung</h3>
+            <small>Eingeloggt als: <strong>@UserState.Username</strong> (@UserState.Role)</small>
+        </div>
+        <button @onclick="Logout" class="btn btn-danger">Logout</button>
+    </div>  *@
     @* wenn eingeloggt, geschützte Seite anzeigen *@
     
 
-<h3>Benutzerverwaltung</h3>
+@* <h3>Benutzerverwaltung</h3> *@
 
 @* Benachrichtigung für User, das sie nur daten laden aber nicht ändern können. *@
 @if (UserState.Role == RoleType.User)
@@ -131,46 +138,150 @@ else
 }
 @code {
 
-   private bool showRedirectMessage = false;
-
-    protected override void OnInitialized()
-    {
-        if (!UserState.IsLoggedIn)
-        {
-            showRedirectMessage = true;
-            //Navigation.NavigateTo("/account/login", true);
-
-        }
-    }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender && !UserState.IsLoggedIn)
-        {
-            Navigation.NavigateTo("/account/login", true);
-        }
-
-
-    }
-
+    private bool isValidatingSession = true;
     private List<User> users;
     private User newUser = new();
     private string errorMessage = "";
     private string successMessage = "";
 
-    @* Code für Sync von eingespeichert daten aus SQL*@
-    protected override async Task OnInitializedAsync()
+   // private bool showRedirectMessage = false;
+
+   //  protected override void OnInitialized()
+   //  {
+   //      if (!UserState.IsLoggedIn)
+   //      {
+   //          showRedirectMessage = true;
+   //          //Navigation.NavigateTo("/account/login", true);
+
+   //      }
+   //  }
+
+   //  protected override void OnAfterRender(bool firstRender)
+   //  {
+   //      if (firstRender && !UserState.IsLoggedIn)
+   //      {
+   //          Navigation.NavigateTo("/account/login", true);
+   //      }
+
+
+   //  }
+     protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Console.WriteLine("OnAfterRenderAsync - firstRender");
+
+            //Session aus browser laden        
+            var loaded = await UserState.LoadFromStorage();
+            Console.WriteLine($"LoadFromStorage result: {loaded}");
+            Console.WriteLine($"SessionId: {UserState.SessionId}");
+            Console.WriteLine($"Username: {UserState.Username}");
+
+            if (!loaded || string.IsNullOrEmpty(UserState.SessionId))
+            {
+                Console.WriteLine("Keine gespeicherte Session - Weiterleitung zum Login");
+                // showRedirectMessage = true;
+                Navigation.NavigateTo("/account/login", forceLoad: true);
+                return;
+            }
+
+            // Session beim Backend validieren
+            try
+            {
+                Console.WriteLine($"Validiere Session: {UserState.SessionId}");
+                var response = await Http.GetAsync($"/api/login/validate?sessionId={UserState.SessionId}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<SessionValidationResponse>();
+
+                    if (result != null && result.Success)
+                    {
+                        Console.WriteLine($"Session gültig für User: {UserState.Username}");
+                        isValidatingSession = false;
+
+                        // Incidents laden
+                        await LoadUsers();
+                        StateHasChanged();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Session ungültig - Logout");
+                        await UserState.ClearStorage();
+                        Navigation.NavigateTo("/account/login", forceLoad: true);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Session-Validierung fehlgeschlagen: {response.StatusCode}");
+                    await UserState.ClearStorage();
+                    Navigation.NavigateTo("/account/login", forceLoad: true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Fehler bei Session-Validierung: {ex.Message}");
+                errorMessage = $"Fehler beim Laden: {ex.Message}";
+                await LoadMockData();
+                isValidatingSession = false;
+                StateHasChanged();
+            }
+        }
+    }
+    @* Logout-Methode *@
+    private async Task Logout()
     {
         try
         {
-            await LoadUsers();
+            // Optional: Backend über Logout informieren
+            // await Http.PostAsync($"/api/login/logout?sessionId={UserState.SessionId}", null);
+            
+            await UserState.ClearStorage();
+            Console.WriteLine("Logout erfolgreich");
+            Navigation.NavigateTo("/account/login", forceLoad: true);
         }
         catch (Exception ex)
         {
-            errorMessage = $"Fehler: {ex.Message}";
-            LoadMockData();
+            Console.WriteLine($"Fehler beim Logout: {ex.Message}");
+            await UserState.ClearStorage();
+            Navigation.NavigateTo("/account/login", forceLoad: true);
         }
     }
+
+
+
+  
+
+    //   @* Logout-Methode *@
+    // private async Task Logout()
+    // {
+    //     try
+    //     {
+    //         await UserState.ClearStorage();
+    //         Console.WriteLine("Logout erfolgreich");
+    //         Navigation.NavigateTo("/account/login", forceLoad: true);
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine($"Fehler beim Logout: {ex.Message}");
+    //         await UserState.ClearStorage();
+    //         Navigation.NavigateTo("/account/login", forceLoad: true);
+    //     }
+    // }
+
+    @* Code für Sync von eingespeichert daten aus SQL*@
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     try
+    //     {
+    //         await LoadUsers();
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         errorMessage = $"Fehler: {ex.Message}";
+    //         LoadMockData();
+    //     }
+    // }
 
     @* Code für Laden von eingespeichert daten aus SQL*@
     private async Task LoadUsers()
@@ -188,7 +299,8 @@ else
         }
     }
     @* Code für Laden von Dummydaten*@
-    private void LoadMockData()
+    // private void LoadMockData()
+    private Task LoadMockData()
     {
         users = new List<User>
         {
@@ -197,6 +309,7 @@ else
         };
         successMessage = "Dummy-Daten geladen";
         StateHasChanged();
+        return Task.CompletedTask;
     }
 
     @* Code für neue User anlegen und an SQL senden*@
@@ -286,6 +399,18 @@ else
     }
 
     private bool IsDummy() => users?.FirstOrDefault()?.Email?.EndsWith("@fh.at") ?? false;
+     public class SessionValidationResponse
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public UserInfo User { get; set; }
+    }
 
+    public class UserInfo
+    {
+        public int Id { get; set; }
+        public string Username { get; set; }
+        public string Role { get; set; }
+    }
   
 }
