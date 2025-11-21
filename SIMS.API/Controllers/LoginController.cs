@@ -1,11 +1,10 @@
-﻿//using Microsoft.AspNetCore.Identity.Data;
+﻿
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SIMS.Core.Classes;
 using SIMS.Core.Security;
-//using SIMS.Core;
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
 
 namespace SIMS.API.Controllers
 {
@@ -106,12 +105,6 @@ namespace SIMS.API.Controllers
             return Ok(new { success = true, message = "Session gültig", sessionData });
         }
 
-        //[HttpPost("logout")]
-        //public IActionResult Logout([FromBody] LogoutRequest request)
-        //{
-        //    // In production, you would delete the session from Redis here
-        //    return Ok(new { success = true, message = "Logout successful" });
-        //}
     }
 }
 

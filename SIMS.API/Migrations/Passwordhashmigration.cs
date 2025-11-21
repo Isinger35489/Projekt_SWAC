@@ -117,7 +117,7 @@ namespace SIMS.API.Migrations
                 await context.SaveChangesAsync();
 
             }
-            catch (Exception ex)
+            catch 
             {
                 throw;
             }
