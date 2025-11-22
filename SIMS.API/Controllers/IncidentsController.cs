@@ -46,7 +46,7 @@ namespace SIMS.API.Controllers
             return incident ?? (ActionResult<Incident>)NotFound();
         }
 
-        // Test-Endpunkt ohne DB, nur Telegram
+        /* Test-Telegram
         [HttpPost("test-telegram-only")]
         public async Task<IActionResult> TestTelegramOnly()
         {
@@ -64,6 +64,7 @@ namespace SIMS.API.Controllers
 
             return Ok("Telegram-Alert wurde gesendet (oder Fehler in Console/Error ansehen).");
         }
+        */
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Incident incident)
