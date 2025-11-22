@@ -477,6 +477,8 @@ Ran 133 rules on 86 files: 4 findings.
 ⚡ Supercharge Semgrep OSS when you create a free account at https://sg.run/rules.
 
 ⏫ A new version of Semgrep is available. See https://semgrep.dev/docs/upgrading
+```
+
 Fazit zu den Findings:
 Es wurden 4 Findings gefunden, keine davon kritisch, aber alle sicherheitsrelevant.
 SessionController: POST /api/session ändert Serverzustand ohne CSRF-/Antiforgery-Schutz oder strikte Content-Type-Prüfung → in Produktion absichern oder entfernen.
