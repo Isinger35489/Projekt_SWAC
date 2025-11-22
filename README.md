@@ -484,7 +484,7 @@ Es wurden 4 Findings gefunden, keine davon kritisch, aber alle sicherheitsreleva
 SessionController: POST /api/session ändert Serverzustand ohne CSRF-/Antiforgery-Schutz oder strikte Content-Type-Prüfung → in Produktion absichern oder entfernen.
 Dockerfiles (API & Web): Container laufen aktuell als root → künftig eigenen, nicht-privilegierten User verwenden.
 Telegram-Bot-Token liegt in appsettings.json → Token rotieren und in Zukunft nur über Environment-Variablen / Secret-Store, nicht im Git-Repo.
-```
+
 
 </details>
 
