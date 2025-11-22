@@ -116,9 +116,9 @@ docker exec -it sims-app dotnet SIMS.App.dll
 
 </details>
 
-### Telegram-Alerter
+### <h4 style="color: #ffffff; font-weight: bold;">Telegram-Incident-Alerter:</h4> 
 
-Beim Anlegen eines neuen Incidents sendet das Backend optional eine Benachrichtigung an einen definierten Telegram-Chat. Bot-Token, Chat-ID und die minimale Schwere, ab der ein Alert ausgelöst wird, werden über `appsettings.json` konfiguriert (`Telegram:BotToken`, `Telegram:ChatId`, `Telegram:MinSeverityForAlert`). Nur Incidents mit einer Severity größer/gleich der konfigurierten Schwelle (z.B. `High`/`hoch` oder `Critical`/`kritisch`) erzeugen eine Telegram-Meldung, alle anderen werden ignoriert.
+Beim Anlegen eines neuen Incidents sendet das Backend optional eine Benachrichtigung an einen definierten Telegram-Chat. Bot-Token, Chat-ID und die minimale Schwere, ab der ein Alert ausgelöst wird, werden über `appsettings.json` konfiguriert (`Telegram:BotToken`, `Telegram:ChatId`, `Telegram:MinSeverityForAlert`). Nur Incidents mit einer Severity größer/gleich der konfigurierten Schwelle (`High`/`hoch` oder `Critical`/`kritisch`) erzeugen eine Telegram-Meldung, alle anderen werden ignoriert.
 
 
 ##   <h1 style="color: #ffffff; font-weight: bold;">🏗️ Architektur</h1>
