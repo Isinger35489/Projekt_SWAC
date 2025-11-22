@@ -132,7 +132,7 @@ dotnet ef database update
 
 ### <h1 style="color: #ffffff; font-weight: bold;"> 📱Telegram-Incident-Alerter:</h4> 
 
-Beim Anlegen eines neuen Incidents sendet das Backend optional eine Benachrichtigung an einen definierten Telegram-Chat. Bot-Token, Chat-ID und die minimale Schwere, ab der ein Alert ausgelöst wird, werden über `appsettings.json` konfiguriert (`Telegram:BotToken`, `Telegram:ChatId`, `Telegram:MinSeverityForAlert`). Nur Incidents mit einer Severity größer/gleich der konfigurierten Schwelle (`High`/`hoch` oder `Critical`/`kritisch`) erzeugen eine Telegram-Meldung, alle anderen werden ignoriert.
+Beim Anlegen eines neuen Incidents – egal ob über das Backend oder die Web-Oberfläche – kann das System automatisch eine Benachrichtigung an einen definierten Telegram-Chat senden. Der Telegram-Alerter wird über `appsettings.json` konfiguriert. Nur Incidents, deren Severity größer oder gleich der konfigurierten Schwelle ist (`High`/`hoch` oder `Critical`/`kritisch`), lösen eine Telegram-Meldung aus; alle weniger kritischen Incidents werden ignoriert.
 
 
 
