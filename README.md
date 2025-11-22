@@ -116,6 +116,20 @@ docker exec -it sims-app dotnet SIMS.App.dll
 
 </details>
 
+
+### <h4 style="color: #ffffff; font-weight: bold;"> 🚀 4️⃣ Datenbank Migration durchführen </h4>
+```
+Damit die SQL Datenbank db-1 alle notwendigen Tabellen und Attribute hat, muss vorher eine Datenbankmigration gemacht werden.
+Dies geht am leichtesten per EntityFramework Migration.
+Dazu in der Commandline in den Ordner "./Projekt_SWAC/SIMS.API" wechseln:
+cd ./Projekt_SWAC/SIMS.API
+und die ef Migration starten durchführen (für alle Fälle):
+dotnet ef migrations add Startmigration
+
+und auf die Datenbank übertragen:  
+dotnet ef database update
+```
+
 ### <h1 style="color: #ffffff; font-weight: bold;"> 📱Telegram-Incident-Alerter:</h4> 
 
 Beim Anlegen eines neuen Incidents sendet das Backend optional eine Benachrichtigung an einen definierten Telegram-Chat. Bot-Token, Chat-ID und die minimale Schwere, ab der ein Alert ausgelöst wird, werden über `appsettings.json` konfiguriert (`Telegram:BotToken`, `Telegram:ChatId`, `Telegram:MinSeverityForAlert`). Nur Incidents mit einer Severity größer/gleich der konfigurierten Schwelle (`High`/`hoch` oder `Critical`/`kritisch`) erzeugen eine Telegram-Meldung, alle anderen werden ignoriert.
