@@ -118,15 +118,20 @@ docker exec -it sims-app dotnet SIMS.App.dll
 
 
 ### <h4 style="color: #ffffff; font-weight: bold;"> 🚀 4️⃣ Datenbank Migration durchführen </h4>
-```
+
 Damit die SQL Datenbank db-1 alle notwendigen Tabellen und Attribute hat, muss vorher eine Datenbankmigration gemacht werden.
 Dies geht am leichtesten per EntityFramework Migration.
-Dazu in der Commandline in den Ordner "./Projekt_SWAC/SIMS.API" wechseln:
-cd ./Projekt_SWAC/SIMS.API
-und die ef Migration starten durchführen (für alle Fälle):
-dotnet ef migrations add Startmigration
 
+Dazu in der Commandline in den Ordner "./Projekt_SWAC/SIMS.API" wechseln:
+```
+cd ./Projekt_SWAC/SIMS.API
+```
+und die ef Migration starten durchführen (für alle Fälle):
+```
+dotnet ef migrations add Startmigration
+```
 und auf die Datenbank übertragen:  
+```
 dotnet ef database update
 ```
 
