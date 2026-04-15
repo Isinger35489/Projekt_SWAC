@@ -1,3 +1,6 @@
+
+#
+
 services:
   api:
     build:
@@ -15,7 +18,22 @@ services:
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetcore-dev-cert.pfx
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      
+services:
+  sims-api:
+    build: .
+    secrets:
+      - kestrel_cert_password
+      - kestrel_cert
+    environment:
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/run/secrets/kestrel_cert
+      - ASPNETCORE_Kestrel__Certificates__Default__Password_File=/run/secrets/kestrel_cert_password
 
+secrets:
+  kestrel_cert_password:
+    external: true
+  kestrel_cert:
+    external: true
   web:
     build:
       context: .

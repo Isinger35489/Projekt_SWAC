@@ -24,6 +24,14 @@ FROM base AS final
 WORKDIR /app
 COPY --from=build /app .
 COPY aspnetcore-dev-cert.pfx /https/aspnetcore-dev-cert.pfx
+
+# VULNERABILITY: Hardcoded Secrets in Configuration Files​
+# DESCRIPTION: Das Passwort für das TLS-Zertifikat ist im Dockerfile als Klartext enthalten. ​
+# Jede:r der/die auf das Image Zugriff hat, kann problemlos auf die Secrets zugreifen und das Zertifikat entschlüsseln.
+# MITIGATION: Geheime Daten als Secret oder als Umgebungsvariable übergeben. Build-Argumente verwenden. ​
+# Docker Secrets oder Orchest Tools (Kubernetes Secrets) in Produktionsumgebung verwenden.​
+
+#VULNERABLE CODE:
 ENV ASPNETCORE_Kestrel__Certificates__Default__Password=yourpassword
 ENV ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetcore-dev-cert.pfx
 ENTRYPOINT ["dotnet", "SIMS.API.dll"]

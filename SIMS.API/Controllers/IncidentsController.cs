@@ -7,6 +7,19 @@ using Microsoft.Extensions.Logging;
 using SIMS.Core.Classes;
 using SIMS.API.Services;
 
+
+
+/*
+
+
+Schadlevel: KRITISCH​
+VULNERABILITY: Broken Access Control ​
+DESCRIPTION: Keine Authentifizierung Endpoints sind komplett offen. ​Jeder angemeldete User kann ohne Identitätsnachweis auf die API zugreifen. ​
+MITIGATION: auf Controller-Ebene eine Authentifizierung setzen.​ Sensible Operationen wie DELETE oder PUT zusätzlich auf bestimmte Rollen (z.B. Administrator) zu beschränken​
+
+*/
+
+//VULNERABLE Code: Controller-Ebene
 namespace SIMS.API.Controllers
 {
     [ApiController]
@@ -46,26 +59,13 @@ namespace SIMS.API.Controllers
             return incident ?? (ActionResult<Incident>)NotFound();
         }
 
-        /* Test-Telegram
-        [HttpPost("test-telegram-only")]
-        public async Task<IActionResult> TestTelegramOnly()
-        {
-            var dummy = new Incident
-            {
-                Id = 9999,
-                System = "TEST-SYSTEM",
-                Severity = "Low",
-                Status = "Open",
-                Description = "Dies ist ein Test-Alert",
-                CreatedAt = DateTime.Now
-            };
-
-            await _telegramAlerter.SendIncidentCreatedAsync(dummy);
-
-            return Ok("Telegram-Alert wurde gesendet (oder Fehler in Console/Error ansehen).");
-        }
-        */
-
+/* 
+VULNERABILITY: Missing Input Sanitization (XXS)​
+DESCRIPTION: Ein Angreifer kann Felder mitsenden, die er nicht setzen sollte.
+Schadcode kann z.B: über Description oder andere Textfelder in die Datenbank geschrieben und später im Frontend ausgeführt werden. ​
+MITIGATION: HtmlEncoder.Default.Encode() verwenden. Anti-XSS Library nutzen. Content Security Policy (CSP) implementieren.
+VULNERABLE CODE:
+*/ 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Incident incident)
         {
@@ -98,7 +98,16 @@ namespace SIMS.API.Controllers
             return CreatedAtAction(nameof(Get), new { id = incident.Id }, incident);
         }
 
+
+
         [HttpPut("{id}")]
+/* 
+VULNERABILITY: Missing Input Sanitization (XXS)​
+DESCRIPTION: Ein Angreifer kann Felder mitsenden, die er nicht setzen sollte.
+Schadcode kann z.B: über Description oder andere Textfelder in die Datenbank geschrieben und später im Frontend ausgeführt werden. ​
+MITIGATION: HtmlEncoder.Default.Encode() verwenden. Anti-XSS Library nutzen. Content Security Policy (CSP) implementieren.
+VULNERABLE CODE:
+*/ 
         public async Task<IActionResult> Put(int id, [FromBody] Incident incident)
         {
             if (incident == null)
