@@ -85,9 +85,11 @@ MITIGATION: Fehlversuche in Redis zählen und den Account nach Erreichen von Max
 
 
 /*
-VULNERABILITY: Insecure Session Data Format
-DESCRIPTION: Session-Daten werden als manipulierbarer Klartext-String gespeichert. Wer Redis-Zugriff hat kann die Rolle direkt lesen und über den offenen 
-SessionController manipulieren.
+VULNERABILITY: Unsafe Session Data Serialization
+DESCRIPTION: Session-Daten werden aktuell als einfacher, durch Trennzeichen zusammengebauter String gespeichert. 
+Dieses Format ist fehleranfällig, nicht typisiert und erschwert eine sichere Validierung sowie spätere Erweiterungen.
+MITIGATION: Session-Daten als strukturiertes Objekt z.B. JSON speichern und beim Auslesen strikt validieren, 
+oder auf etablierte Token- & Session-Mechanismen mit Integritätsschutz z.B. signierte Tokens umsteigen.
 MITIGATION: Session-Daten als strukturiertes JSON serialisieren oder auf JWT Bearer Tokens umsteigen die kryptografisch signiert sind.
 */
             // Create session in Redis
