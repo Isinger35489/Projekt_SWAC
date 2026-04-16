@@ -8,6 +8,12 @@ using SIMS.Core.Security;
 
 namespace SIMS.API.Controllers
 {
+
+/*
+VULNERABILITY: Broken Access Control
+DESCRIPTION: Keine Authorisierung auf Controller-Ebene, der Validate-Endpoint ist vollständig offen und kann von jedem ohne Authentifizierung aufgerufen werden.
+MITIGATION: [Authorize] auf den Validate-Endpoint setzen damit nur authentifizierte User ihre Session validieren können.
+*/
     [Route("api/[controller]")]
     [ApiController]
 
@@ -23,6 +29,12 @@ namespace SIMS.API.Controllers
             _passwordHasher = new PasswordHasher();
         }
 
+/*
+VULNERABILITY: Missing Brute-Force Protection
+DESCRIPTION: Es gibt keine Begrenzung der Login-Versuche obwohl MaxLoginAttempts: 5 
+in der appsettings.json konfiguriert ist. Ein Angreifer kann unbegrenzt Passwörter durchprobieren ohne gesperrt zu werden.
+MITIGATION: Fehlversuche in Redis zählen und den Account nach Erreichen von MaxLoginAttempts temporär sperren. Konfigurationswert aus appsettings.json tatsächlich verwenden.
+*/
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginRequest request) //ist angegeben 
         {
@@ -71,9 +83,21 @@ namespace SIMS.API.Controllers
                 });
             }
 
+
+/*
+VULNERABILITY: Insecure Session Data Format
+DESCRIPTION: Session-Daten werden als manipulierbarer Klartext-String gespeichert. Wer Redis-Zugriff hat kann die Rolle direkt lesen und über den offenen 
+SessionController manipulieren.
+MITIGATION: Session-Daten als strukturiertes JSON serialisieren oder auf JWT Bearer Tokens umsteigen die kryptografisch signiert sind.
+*/
             // Create session in Redis
             var sessionId = Guid.NewGuid().ToString();
             var sessionData = $"{user.Id}|{user.Username}|{user.Role}";
+/*
+VULNERABILITY: Missing Session Expiry
+DESCRIPTION: Sessions werden ohne Ablaufdatum gesetzt obwohl SessionExpirationMinutes: 60 in der appsettings.json konfiguriert ist. Eine gestohlene Session ist damit dauerhaft gültig.
+MITIGATION: TTL beim Setzen der Session übergeben und den konfigurierten SessionExpirationMinutes-Wert tatsächlich verwenden.
+*/
             _redisSession.SetSession($"session:{sessionId}", sessionData);
 
             // Return success response
