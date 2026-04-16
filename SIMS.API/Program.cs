@@ -165,10 +165,12 @@ MITIGATION: Redis-Passwort setzen und TLS-Verbindung erzwingen. Verbindungsstrin
             
             // Configure the HTTP request pipeline.
 /*
-VULNERABILITY: Swagger aktivierbar
-DESCRIPTION: Swagger ist zwar auf Development beschränkt, aber falls die Umgebungsvariable falsch gesetzt ist läuft Swagger auch in Produktion.
-    Swagger legt die gesamte API-Struktur, Endpoints und Parameter offen.
-MITIGATION: Zusätzlich zur Environment-Prüfung Swagger explizit über eine Konfigurationsoption steuerbar machen und in Produktion grundsätzlich deaktivieren.
+VULNERABILITY: Offen zugängliche API-Dokumentation über Swagger
+DESCRIPTION: Swagger ist zwar auf die Entwicklungsumgebung beschränkt, legt dort aber die
+API-Struktur, Endpoints und Parameter offen. Bei Fehlkonfiguration der Umgebung könnte
+diese Dokumentation unbeabsichtigt auch außerhalb von Development verfügbar sein.
+MITIGATION: Swagger zusätzlich über eine Konfigurationsoption absichern und
+außerhalb von Development deaktiviert lassen.
 */
             if (app.Environment.IsDevelopment())
             {
