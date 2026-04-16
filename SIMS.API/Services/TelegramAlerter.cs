@@ -147,6 +147,13 @@ namespace SIMS.API.Services
                var description = string.IsNullOrWhiteSpace(incident.Description)
                    ? "(keine Beschreibung angegeben)"
                    : incident.Description;
+
+// VULNERABILITY: Missing Input Validation / Message Injection
+// DESCRIPTION: Werte aus dem Incident werden direkt in die Telegram-Nachricht übernommen.
+// Dadurch könnten manipulierte Inhalte oder unerwünschte Sonderzeichen in die Nachricht gelangen.
+// MITIGATION: Eingaben vor der Verwendung prüfen und bereinigen.
+// Benutzerdaten nicht ungefiltert in Nachrichten übernehmen.
+            
    
                var text =
                    $"[SIMS] Neues Incident #{incident.Id}\n" +
@@ -154,7 +161,13 @@ namespace SIMS.API.Services
                    $"Severity: {incident.Severity}\n" +
                    $"Status: {incident.Status}\n" +
                    $"Beschreibung: {description}";
-   
+
+// VULNERABILITY: Sensitive Data Exposure
+// DESCRIPTION: Der Bot-Token wird direkt in die URL eingebaut.
+// Wenn URLs geloggt werden, könnte der Token sichtbar werden.
+// MITIGATION: Tokens nicht direkt in URLs verwenden
+// oder sicherstellen, dass solche URLs nicht mitgeloggt werden.
+            
                var url = $"https://api.telegram.org/bot{_botToken}/sendMessage";
    
                var data = new Dictionary<string, string>
@@ -168,7 +181,13 @@ namespace SIMS.API.Services
                try
                {
                    var response = await _httpClient.PostAsync(url, content);
-   
+
+// VULNERABILITY: Sensitive Data Exposure in Logs
+// DESCRIPTION: Im Fehlerfall wird die Antwort der Telegram-API direkt ausgegeben.
+// Dadurch könnten interne oder sensible Informationen in Logs landen.
+// MITIGATION: Nur allgemeine Fehlermeldungen oder den Status-Code loggen,
+// aber keine kompletten Antworten ausgeben.
+                
                    if (!response.IsSuccessStatusCode)
                    {
                        var body = await response.Content.ReadAsStringAsync();
@@ -176,6 +195,13 @@ namespace SIMS.API.Services
                            $"Telegram-Alert fehlgeschlagen ({(int)response.StatusCode} {response.StatusCode}): {body}");
                    }
                }
+
+// VULNERABILITY: Information Disclosure through Logging
+// DESCRIPTION: Die komplette Exception wird ausgegeben.
+// Dadurch könnten interne Details der Anwendung in Logs sichtbar werden.
+// MITIGATION: Nur eine kurze Fehlermeldung loggen
+// und keine kompletten Exception-Details ausgeben.
+            
                catch (Exception ex)
                {
                    Console.Error.WriteLine($"Telegram-Alert Exception: {ex}");
