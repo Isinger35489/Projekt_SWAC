@@ -109,6 +109,12 @@ namespace SIMS.API.Controllers
             if (string.IsNullOrEmpty(sessionData))
                 return NotFound(new { success = false, message = "Ungültige oder abgelaufene Session" });
 
+// VULNERABILITY: Sensitive Data Exposure
+// DESCRIPTION: Der Endpoint gibt interne Session-Daten direkt an den Client zurück.
+// Dadurch werden unnötige Informationen über Benutzer oder Rollen offengelegt.
+// MITIGATION: Nur zurückgeben, ob die Session gültig ist,
+// aber keine internen Session-Daten mitsenden.
+
             return Ok(new { success = true, message = "Session gültig", sessionData });
         }
 
