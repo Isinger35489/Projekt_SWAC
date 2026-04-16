@@ -40,6 +40,13 @@ namespace SIMS.API.Controllers
             return await _context.Users.ToListAsync();
         }
 
+// VULNERABILITY: Sensitive Data Exposure
+// DESCRIPTION: Über die ID kann jeder beliebige Benutzer aufgerufen werden.
+// Dadurch könnten auch sensible Daten wie Passwort-Hash, Rolle oder E-Mail sichtbar werden.
+// Es wird nicht geprüft, ob der anfragende Benutzer diesen Datensatz überhaupt sehen darf.
+// MITIGATION: Den Endpoint absichern und prüfen,
+// ob der Benutzer nur seine eigenen Daten oder als Admin fremde Daten sehen darf.
+
         // GET: api/Users/5
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
@@ -53,6 +60,14 @@ namespace SIMS.API.Controllers
 
             return user;
         }
+
+// VULNERABILITY: Overposting / Missing Authorization
+// DESCRIPTION: Der Endpoint übernimmt das komplette User-Objekt vom Client.
+// Dadurch könnten Felder geändert werden, die nicht frei änderbar sein sollten,
+// zum Beispiel Rolle, Enabled oder PasswordHash.
+// Außerdem fehlt eine klare Rechteprüfung.
+// MITIGATION: Nur erlaubte Felder über ein DTO entgegennehmen
+// und den Endpoint mit Authentifizierung und Rollenprüfung absichern.
 
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
