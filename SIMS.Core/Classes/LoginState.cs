@@ -23,12 +23,13 @@ public class LoginState
         try
         {
 
-// VULNERABILITY: Insecure Session Handling
-// DESCRIPTION: Die Session-ID und weitere Login-Daten werden im Browser gespeichert.
-// Wenn ein Angreifer Zugriff auf den Client bekommt, könnten diese Daten ausgelesen
-// und für eine missbräuchliche Nutzung der Session verwendet werden.
-// MITIGATION: Möglichst wenig sicherheitsrelevante Daten im Browser speichern.
-// Session-Handling besser serverseitig oder über sichere Cookies umsetzen.
+// VULNERABILITY: Sensitive Session Data Stored in Browser Storage / Insecure Session Handling
+// DESCRIPTION: Die Session-ID und weitere Login-Daten werden im Browser gespeichert. 
+// Dadurch steigt das Risiko, dass sie bei Angriffen auf den Client wie z.B. mit XSS abgegriffen und missbraucht werden können.
+// MITIGATION: Nur unbedingt notwendige und möglist wenig sicherheitskritische Daten im Browser speichern.
+// Session-IDs und vergleichbare Authentifizierungsdaten bevorzugt serverseitig oder über
+// sichere Cookies verwalten.
+                
             await _sessionStorage.SetAsync("userId", Id);
             await _sessionStorage.SetAsync("username", Username);
             await _sessionStorage.SetAsync("userRole", Role.ToString());
