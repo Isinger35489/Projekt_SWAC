@@ -58,7 +58,7 @@ namespace SIMS.API.Controllers
 
 /* 
 VULNERABILITY: Missing Input Sanitization (XXS)​
-DESCRIPTION: Textfelder wie Description werden ohne Längenbegrenzung oder Encoding entgegengenommen. 
+DESCRIPTION: Textfelder wie werden ohne Längenbegrenzung oder Encoding entgegengenommen. 
 Schadcode kann über Description in die Datenbank geschrieben und später im Frontend ausgeführt werden.
 MITIGATION: DTO mit Validierungsattributen ([MaxLength], [RegularExpression]) verwenden.
     HtmlEncoder.Default.Encode() verwenden. Anti-XSS Library nutzen. Content Security Policy (CSP) implementieren.
