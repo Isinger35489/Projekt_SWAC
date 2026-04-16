@@ -24,7 +24,16 @@ namespace SIMS.API.Controllers
             _passwordHasher = new PasswordHasher();
         }
 
+
+
+        // VULNERABILITY: Sensitive Data Exposure
+        // DESCRIPTION: Der Endpoint gibt alle User vollständig zurück.
+        // Dadurch könnten sensible Daten wie Passwort-Hash, E-Mail oder Rolle
+        // unnötig an den Client weitergegeben werden.
+        // MITIGATION: Nur die wirklich benötigten Felder zurückgeben.
+        // Dafür besser ein DTO oder ein vereinfachtes Response-Objekt verwenden.
         // GET: api/Users
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
@@ -101,6 +110,14 @@ namespace SIMS.API.Controllers
 
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
+
+
+        // VULNERABILITY: Broken Access Control
+        // DESCRIPTION: Der Endpoint führt eine sensible Aktion aus,
+        // ohne dass eine sichtbare Authentifizierung oder Rollenprüfung vorhanden ist.
+        // Dadurch könnte ein Benutzer andere Benutzer löschen, obwohl er dazu nicht berechtigt ist.
+        // MITIGATION: Den Endpoint mit Authentifizierung absichern
+        // und nur Administratoren das Löschen erlauben.
 
         // DELETE: api/Users/
         [HttpDelete("{id}")]
