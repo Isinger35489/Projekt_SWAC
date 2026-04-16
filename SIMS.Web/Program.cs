@@ -44,13 +44,11 @@ namespace SIMS.Web
               
                //selbst signiertes Zertifikat übernehmen. Nicht ideal aber besser gehts nicht
 
-// VULNERABILITY: Insecure Certificate Validation / Missing Certificate Pinning
-// DESCRIPTION: Der HttpClient akzeptiert jedes TLS/SSL-Zertifikat ohne echte Prüfung.
-// Dadurch sind Man-in-the-Middle-Angriffe möglich und ein Angreifer könnte die Kommunikation
-// zwischen Web-Frontend und API mitlesen oder manipulieren.
+// VULNERABILITY: Insecure Certificate Validation
+// DESCRIPTION: Der HttpClient akzeptiert jedes Zertifikat, ohne es richtig zu prüfen.
+// Dadurch könnte ein Angreifer die Verbindung zwischen Web und API abfangen oder manipulieren.
 // MITIGATION: DangerousAcceptAnyServerCertificateValidator entfernen.
-// Zertifikate korrekt validieren und in produktiven Umgebungen Certificate Pinning
-// oder eine strikte Trust-Chain-Prüfung verwenden.
+// Zertifikate richtig prüfen und nur vertrauenswürdige Zertifikate erlauben.
                
                ServerCertificateCustomValidationCallback =
                    HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
