@@ -64,10 +64,8 @@ namespace SIMS.API.Controllers
 // VULNERABILITY: Overposting / Missing Authorization
 // DESCRIPTION: Der Endpoint übernimmt das komplette User-Objekt vom Client.
 // Dadurch könnten Felder geändert werden, die nicht frei änderbar sein sollten,
-// zum Beispiel Rolle, Enabled oder PasswordHash.
-// Außerdem fehlt eine klare Rechteprüfung.
-// MITIGATION: Nur erlaubte Felder über ein DTO entgegennehmen
-// und den Endpoint mit Authentifizierung und Rollenprüfung absichern.
+// zum Beispiel Rolle, Enabled oder PasswordHash. Außerdem ist keine sichtbare Rechteprüfung vorhanden.
+// MITIGATION: Nur erlaubte Felder über ein DTO entgegennehmen und den Endpoint mit Authentifizierung und Rollenprüfung absichern.
 
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -155,6 +153,14 @@ namespace SIMS.API.Controllers
             return _context.Users.Any(e => e.Id == id);
         }
         //um aktiveren und deaktiveren von usern
+
+      // VULNERABILITY: Broken Access Control
+     // DESCRIPTION: Der Endpoint führt eine sicherheitsrelevante Aktion aus,
+     // ohne dass eine sichtbare Authentifizierung oder Rollenprüfung vorhanden ist.
+     // Dadurch könnte ein Benutzer andere Benutzer aktivieren oder deaktivieren,
+     // obwohl er dazu nicht berechtigt ist.
+     // MITIGATION: Den Endpoint mit Authentifizierung absichern und nur Administratoren das Ändern des Enabled-Status erlauben.
+        
         [HttpPatch("{id}/enabled")]
         public async Task<IActionResult> SetUserEnabled(int id, [FromBody] JsonElement body)
         {
