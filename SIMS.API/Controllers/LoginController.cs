@@ -92,6 +92,13 @@ namespace SIMS.API.Controllers
             });
         }
 
+// VULNERABILITY: Insecure Session Handling
+// DESCRIPTION: Die Session-ID wird als Query-Parameter in der URL übertragen.
+// Dadurch kann sie über Browser-History, Logs, Proxies oder Referrer leichter offengelegt werden.
+// Eine geleakte Session-ID kann von Angreifern zur Übernahme einer Session missbraucht werden.
+// MITIGATION: Session-IDs nicht in URLs übertragen.
+// Stattdessen Secure/HttpOnly-Cookies oder geschützte Authorization-Header verwenden.
+
         [HttpGet("validate")]
         public IActionResult Validate([FromQuery] string sessionId)
         {
