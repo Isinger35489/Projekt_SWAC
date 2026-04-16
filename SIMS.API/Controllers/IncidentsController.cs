@@ -12,8 +12,9 @@ using SIMS.API.Services;
 /*
 Schadlevel: KRITISCH​
 VULNERABILITY: Broken Access Control ​
-DESCRIPTION: Keine Authentifizierung Endpoints sind komplett offen. ​Jeder angemeldete User kann ohne Identitätsnachweis auf die API zugreifen. ​
-MITIGATION: auf Controller-Ebene eine Authentifizierung setzen.​ Sensible Operationen wie DELETE oder PUT zusätzlich auf bestimmte Rollen (z.B. Administrator) zu beschränken​
+DESCRIPTION: Es existiert keine explizite Autorisierung auf Controller oder Endpunkte. 
+Dadurch können Benutzer mit Zugriff auf die API z.B. über API-Key Sicherheitskritische Operationen ohne Rollenprüfung durchführen.
+MITIGATION: Auf Controller-Ebene eine Authentifizierung setzen.​ Sensible Operationen wie DELETE oder PUT zusätzlich auf bestimmte Rollen (z.B. Administrator) zu beschränken​
 */
 //VULNERABLE Code: Controller-Ebene
 namespace SIMS.API.Controllers
@@ -57,8 +58,8 @@ namespace SIMS.API.Controllers
 
 /* 
 VULNERABILITY: Missing Input Sanitization (XXS)​
-DESCRIPTION: Ein Angreifer kann Felder mitsenden, die er nicht setzen sollte.
-    Schadcode kann z.B: über Description oder andere Textfelder in die Datenbank geschrieben und später im Frontend ausgeführt werden. ​
+DESCRIPTION: Textfelder wie Description werden ohne Längenbegrenzung oder Encoding entgegengenommen. 
+Schadcode kann über Description in die Datenbank geschrieben und später im Frontend ausgeführt werden.
 MITIGATION: DTO mit Validierungsattributen ([MaxLength], [RegularExpression]) verwenden.
     HtmlEncoder.Default.Encode() verwenden. Anti-XSS Library nutzen. Content Security Policy (CSP) implementieren.
 VULNERABLE CODE:
@@ -100,14 +101,14 @@ VULNERABLE CODE:
 VULNERABILITY: Missing Input Sanitization / Over-Posting
 DESCRIPTION: Das gesamte Incident-Objekt wird ungefiltert entgegengenommen ohne zu prüfen ob der Eintrag überhaupt existiert. Interne Felder wie Severity oder Status 
 können direkt überschrieben werden.
-MITIGATION: DTO verwenden das nur erlaubte Felder enthält. Vor dem Speichern mit 
-     FindAsync() prüfen ob der Eintrag existiert. HtmlEncoder.Default.Encode() auf Textfelder anwenden.
+MITIGATION: Nur eine eigene Eingabe-Klasse mit erlaubten Feldern akzeptieren. Mit FindAsync() sicherstellen dass der Eintrag existiert bevor er überschrieben wird. 
+ HtmlEncoder.Default.Encode() auf Textfelder anwenden.
 */
         [HttpPut("{id}")]
 /* 
 VULNERABILITY: Missing Input Sanitization (XXS)​
-DESCRIPTION: Ein Angreifer kann Felder mitsenden, die er nicht setzen sollte.
-Schadcode kann z.B: über Description oder andere Textfelder in die Datenbank geschrieben und später im Frontend ausgeführt werden. ​
+DESCRIPTION: Textfelder wie Description werden ohne Längenbegrenzung oder Encoding entgegengenommen. 
+Schadcode kann über Description in die Datenbank geschrieben und später im Frontend ausgeführt werden.​
 MITIGATION: HtmlEncoder.Default.Encode() verwenden. Anti-XSS Library nutzen. Content Security Policy (CSP) implementieren.
 VULNERABLE CODE:
 */ 
