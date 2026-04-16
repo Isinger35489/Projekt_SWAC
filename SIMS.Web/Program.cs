@@ -23,7 +23,7 @@ namespace SIMS.Web
             //Verbindung an SQL DB, DB Service starten
             builder.Services.AddDbContext<SimsDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnetion")));
 
-            //Razor Service hinzuf�gen:
+            //Razor Service hinzufügen:
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
@@ -33,16 +33,25 @@ namespace SIMS.Web
                 client.BaseAddress = new Uri(apiBase);
                 client.Timeout = TimeSpan.FromSeconds(30);
 
-                // API key zu allen Requests hinzuf�gen:
+                // API key zu allen Requests hinzufügen:
                 client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
 
-                // zus�tzliche Security Header: danke KI
+                // zusätzliche Security Header: danke KI
                 client.DefaultRequestHeaders.Add("User-Agent", "SIMS.Web/1.0");
             })
            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
            {
               
-               //selbst signiertes Zertifikat �bernehmen. Nicht ideal aber besser gehts nicht
+               //selbst signiertes Zertifikat übernehmen. Nicht ideal aber besser gehts nicht
+
+// VULNERABILITY: Insecure Certificate Validation / Missing Certificate Pinning
+// DESCRIPTION: Der HttpClient akzeptiert jedes TLS/SSL-Zertifikat ohne echte Prüfung.
+// Dadurch sind Man-in-the-Middle-Angriffe möglich und ein Angreifer könnte die Kommunikation
+// zwischen Web-Frontend und API mitlesen oder manipulieren.
+// MITIGATION: DangerousAcceptAnyServerCertificateValidator entfernen.
+// Zertifikate korrekt validieren und in produktiven Umgebungen Certificate Pinning
+// oder eine strikte Trust-Chain-Prüfung verwenden.
+               
                ServerCertificateCustomValidationCallback =
                    HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
            });
