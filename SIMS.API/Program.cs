@@ -38,6 +38,12 @@ namespace SIMS.API
             });
 
             //Datenbank service hinzufügen
+/*
+VULNERABILITY: Hardcoded Connection String
+DESCRIPTION: Die Datenbankverbindung wird direkt aus der Konfiguration gelesen ohne zu prüfen ob sie aus einer sicheren Quelle stammt. 
+    In der appsettings.json  steht die Connection String mit SA-Passwort im Klartext.
+MITIGATION: Connection String über Umgebungsvariablen oder Docker Secrets injizieren und nicht über appsettings.json
+*/
             builder.Services.AddDbContext<SimsDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -87,6 +93,11 @@ namespace SIMS.API
             var redisPort = Environment.GetEnvironmentVariable("REDIS_PORT") ?? "6379";
 
             builder.Services.AddSingleton<IConnectionMultiplexer>(
+/*
+VULNERABILITY: Redis ohne Authentifizierung
+DESCRIPTION: Die Redis-Verbindung wird ohne Passwort oder TLS konfiguriert. Ein Angreifer mit Netzwerkzugriff kann direkt auf den Redis-Store zugreifen und alle Sessions lesen oder manipulieren.
+MITIGATION: Redis-Passwort setzen und TLS-Verbindung erzwingen. Verbindungsstring über Umgebungsvariablen oder Secrets Manager injizieren.
+*/
                 ConnectionMultiplexer.Connect($"{redisHost}:{redisPort},abortConnect=false")
             );
             builder.Services.AddSingleton<RedisSessionService>();
@@ -151,7 +162,14 @@ namespace SIMS.API
 
 
 
+            
             // Configure the HTTP request pipeline.
+/*
+VULNERABILITY: Swagger aktivierbar
+DESCRIPTION: Swagger ist zwar auf Development beschränkt, aber falls die Umgebungsvariable falsch gesetzt ist läuft Swagger auch in Produktion.
+    Swagger legt die gesamte API-Struktur, Endpoints und Parameter offen.
+MITIGATION: Zusätzlich zur Environment-Prüfung Swagger explizit über eine Konfigurationsoption steuerbar machen und in Produktion grundsätzlich deaktivieren.
+*/
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
