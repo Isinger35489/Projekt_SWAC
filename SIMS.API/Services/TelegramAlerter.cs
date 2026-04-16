@@ -148,11 +148,12 @@ namespace SIMS.API.Services
                    ? "(keine Beschreibung angegeben)"
                    : incident.Description;
 
-// VULNERABILITY: Missing Input Validation / Message Injection
-// DESCRIPTION: Werte aus dem Incident werden direkt in die Telegram-Nachricht übernommen.
-// Dadurch könnten manipulierte Inhalte oder unerwünschte Sonderzeichen in die Nachricht gelangen.
-// MITIGATION: Eingaben vor der Verwendung prüfen und bereinigen.
-// Benutzerdaten nicht ungefiltert in Nachrichten übernehmen.
+// VULNERABILITY: Missing Input Validation in Notification Message
+// DESCRIPTION: Werte aus dem Incident werden direkt in die Telegram-Nachricht übernommen,
+// ohne vorherige Validierung. Dadurch können unerwartete oder ungeeignete Inhalte in
+// Benachrichtigungen erscheinen.
+// MITIGATION: Eingaben vor der Verwendung prüfen und bei Bedarf bereinigen.
+// Benutzerdaten nicht ungeprüft in Nachrichten übernehmen.
             
    
                var text =
@@ -163,10 +164,11 @@ namespace SIMS.API.Services
                    $"Beschreibung: {description}";
 
 // VULNERABILITY: Sensitive Data Exposure
-// DESCRIPTION: Der Bot-Token wird direkt in die URL eingebaut.
-// Wenn URLs geloggt werden, könnte der Token sichtbar werden.
-// MITIGATION: Tokens nicht direkt in URLs verwenden
-// oder sicherstellen, dass solche URLs nicht mitgeloggt werden.
+// DESCRIPTION: Der Bot-Token wird direkt in die Request-URL eingebaut.
+// Werden solche URLs geloggt, z. B. in Fehlerlogs oder Monitoring,
+// kann der Token dabei mit ausgegeben und eingesehen werden.
+// MITIGATION: Darauf achten, dass URLs mit enthaltenen Secrets nicht geloggt
+// werden, und Bot-Tokens generell wie Passwörter behandeln und schützen.
             
                var url = $"https://api.telegram.org/bot{_botToken}/sendMessage";
    
